@@ -117,7 +117,7 @@ func (o OptionsInteractions) MarshalJSON() ([]byte, error) {
 		Value any    `json:"value"`
 	}
 
-	var opts []opt = make([]opt, len(o))
+	opts := make([]opt, len(o))
 	for k, v := range o {
 		opts = append(opts, opt{k, v})
 	}

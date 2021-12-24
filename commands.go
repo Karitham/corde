@@ -1,10 +1,7 @@
 package corde
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
+	"github.com/Karitham/corde/internal/rest"
 )
 
 type OptionType int
@@ -29,8 +26,6 @@ const (
 	COMMAND_USER
 	COMMAND_MESSAGE
 )
-
-const API = "https://discord.com/api/v8"
 
 type Command struct {
 	Name              string      `json:"name,omitempty"`
@@ -60,138 +55,91 @@ type Choice[T any] struct {
 	Value T      `json:"value"`
 }
 
-type commandsOpt struct {
+type CommandsOpt struct {
 	guildID Snowflake
 }
 
-func Guild(guildID Snowflake) func(*commandsOpt) {
-	return func(opt *commandsOpt) {
+func GuildOpt(guildID Snowflake) func(*CommandsOpt) {
+	return func(opt *CommandsOpt) {
 		opt.guildID = guildID
 	}
 }
 
-func (m *Mux) GetCommands(options ...func(*commandsOpt)) ([]Command, error) {
-	opt := &commandsOpt{}
+func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]Command, error) {
+	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
 	}
 
-	guild := ""
+	r := rest.Req("applications", m.AppID)
 	if opt.guildID != 0 {
-		guild = fmt.Sprintf("/guilds/%d", opt.guildID)
+		r.Append("guilds", opt.guildID)
 	}
-
-	url := fmt.Sprintf("%s/applications/%d%s/commands", API, m.AppID, guild)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	m.authorize(req)
-
-	resp, err := m.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
+	r.Append("commands")
 
 	var commands []Command
-	if err := json.NewDecoder(resp.Body).Decode(&commands); err != nil {
+	_, err := rest.DoJson(m.Client, r.Get(m.authorize, rest.JSON), &commands)
+	if err != nil {
 		return nil, err
 	}
 
 	return commands, nil
 }
 
-func (m *Mux) RegisterCommand(c Command, options ...func(*commandsOpt)) error {
-	opt := &commandsOpt{}
+func (m *Mux) RegisterCommand(c Command, options ...func(*CommandsOpt)) error {
+	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
 	}
 
-	b := &bytes.Buffer{}
-	if err := json.NewEncoder(b).Encode(c); err != nil {
-		return err
-	}
-
-	guild := ""
+	r := rest.Req("applications", m.AppID).JSONBody(c)
 	if opt.guildID != 0 {
-		guild = fmt.Sprintf("/guilds/%s", opt.guildID)
+		r.Append("guilds", opt.guildID)
 	}
+	r.Append("commands")
 
-	url := fmt.Sprintf("%s/applications/%d%s/commands", API, m.AppID, guild)
-
-	req, err := http.NewRequest(http.MethodPost, url, b)
+	resp, err := m.Client.Do(r.Post(m.authorize, rest.JSON))
 	if err != nil {
 		return err
 	}
-	reqOpts(req, m.authorize, contentTypeJSON)
-
-	resp, err := m.Client.Do(req)
-	if err != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {
-		buf := &bytes.Buffer{}
-		buf.ReadFrom(resp.Body)
-		return fmt.Errorf("error: %w, body: %s, code: %d", err, buf.String(), resp.StatusCode)
-	}
-	return nil
+	return rest.CodeBetween(resp, 200, 299)
 }
 
-func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*commandsOpt)) error {
-	opt := &commandsOpt{}
+func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*CommandsOpt)) error {
+	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
 	}
 
-	b := &bytes.Buffer{}
-	if err := json.NewEncoder(b).Encode(c); err != nil {
-		return err
-	}
-
-	guild := ""
+	r := rest.Req("applications", m.AppID).JSONBody(c)
 	if opt.guildID != 0 {
-		guild = fmt.Sprintf("/guilds/%s", opt.guildID)
+		r.Append("guilds", opt.guildID)
 	}
+	r.Append("commands")
 
-	url := fmt.Sprintf("%s/applications/%d%s/commands", API, m.AppID, guild)
-
-	req, err := http.NewRequest(http.MethodPut, url, b)
+	resp, err := m.Client.Do(r.Put(m.authorize, rest.JSON))
 	if err != nil {
 		return err
 	}
-	reqOpts(req, m.authorize, contentTypeJSON)
-
-	resp, err := m.Client.Do(req)
-	if err != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {
-		buf := &bytes.Buffer{}
-		buf.ReadFrom(resp.Body)
-		return fmt.Errorf("error: %w, body: %s, code: %d", err, buf.String(), resp.StatusCode)
-	}
-	return nil
+	return rest.CodeBetween(resp, 200, 299)
 }
 
-func (m *Mux) DeleteCommand(ID Snowflake, options ...func(*commandsOpt)) error {
-	opt := &commandsOpt{}
+func (m *Mux) DeleteCommand(ID Snowflake, options ...func(*CommandsOpt)) error {
+	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
 	}
-	guild := ""
+
+	r := rest.Req("applications", m.AppID)
 	if opt.guildID != 0 {
-		guild = fmt.Sprintf("/guilds/%s", opt.guildID)
+		r.Append("guilds", opt.guildID)
 	}
+	r.Append("commands", ID)
 
-	url := fmt.Sprintf("%s/applications/%d%s/commands/%d", API, m.AppID, guild, ID)
-
-	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	resp, err := m.Client.Do(r.Delete(m.authorize, rest.JSON))
 	if err != nil {
 		return err
 	}
-	reqOpts(req, m.authorize, contentTypeJSON)
 
-	resp, err := m.Client.Do(req)
-	if err != nil || resp.StatusCode != 404 && resp.StatusCode != 204 {
-		buf := &bytes.Buffer{}
-		buf.ReadFrom(resp.Body)
-		return fmt.Errorf("error: %w, body: %s, code: %d", err, buf.String(), resp.StatusCode)
-	}
-	return nil
+	return rest.ExpectCode(resp, 204)
 }

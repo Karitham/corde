@@ -2,7 +2,6 @@ package corde
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -12,6 +11,10 @@ import (
 type InteractionCommand struct {
 	Type  InteractionType `json:"type"`
 	Route string          `json:"name"`
+}
+
+func SlashCommand(route string) InteractionCommand {
+	return InteractionCommand{Type: APPLICATION_COMMAND, Route: route}
 }
 
 // Mux is a discord gateway muxer, which handles the routing
@@ -139,9 +142,5 @@ func reqOpts(req *http.Request, h ...func(*http.Request)) {
 }
 
 func (m *Mux) authorize(req *http.Request) {
-	req.Header.Add("Authorization", fmt.Sprintf("Bot %s", m.BotToken))
-}
-
-func contentTypeJSON(req *http.Request) {
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bot "+m.BotToken)
 }

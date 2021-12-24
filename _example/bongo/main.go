@@ -29,9 +29,9 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.SetRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Route: "bongo"}, bongoHandler)
+	m.SetRoute(corde.SlashCommand("bongo"), bongoHandler)
 
-	g := corde.Guild(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
+	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	if err := m.RegisterCommand(command, g); err != nil {
 		log.Fatalln("error registering command: ", err)
 	}
