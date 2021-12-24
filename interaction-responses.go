@@ -10,6 +10,7 @@ type InteractionRespData struct {
 	Embeds          []Embed          `json:"embeds,omitempty"`
 	AllowedMentions *AllowedMentions `json:"allowed_mentions,omitempty"`
 	Flags           IntResponseFlags `json:"flags,omitempty"`
+	Components      []Component      `json:"components,omitempty"`
 	Attachements    []Attachment     `json:"attachments,omitempty"`
 }
 
@@ -82,12 +83,6 @@ type Image struct {
 
 type MessageReference struct {
 	MessageID string `json:"message_id"`
-}
-
-type Attachments struct {
-	ID          int    `json:"id"`
-	Description string `json:"description"`
-	Filename    string `json:"filename"`
 }
 
 // Opt returns a ptr to the type

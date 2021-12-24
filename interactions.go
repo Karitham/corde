@@ -59,7 +59,7 @@ type Interaction struct {
 	GuildID       Snowflake       `json:"guild_id"`
 	ChannelID     Snowflake       `json:"channel_id"`
 	Member        Member          `json:"member"`
-	Message       string          `json:"message"`
+	Message       Message         `json:"message"`
 	ApplicationID Snowflake       `json:"application_id"`
 	ID            Snowflake       `json:"id"`
 	Token         string          `json:"token"`
@@ -68,14 +68,39 @@ type Interaction struct {
 	Version       int             `json:"version"`
 }
 
+type Message struct {
+	Type            int          `json:"type"`
+	Tts             bool         `json:"tts"`
+	Timestamp       time.Time    `json:"timestamp"`
+	Pinned          bool         `json:"pinned"`
+	MentionEveryone bool         `json:"mention_everyone"`
+	ID              string       `json:"id"`
+	Flags           int          `json:"flags"`
+	Embeds          []Embed      `json:"embeds"`
+	EditedTimestamp *time.Time   `json:"edited_timestamp"`
+	Content         string       `json:"content"`
+	Components      []Component  `json:"components"`
+	ChannelID       string       `json:"channel_id"`
+	Author          Author       `json:"author"`
+	Attachments     []Attachment `json:"attachments"`
+}
+
+type MessageAuthor struct {
+	Username      string `json:"username"`
+	PublicFlags   int    `json:"public_flags"`
+	ID            string `json:"id"`
+	Discriminator string `json:"discriminator"`
+	Avatar        string `json:"avatar"`
+}
+
 type InteractionData struct {
 	ID            Snowflake           `json:"id"`
 	Name          string              `json:"name"`
 	Type          int                 `json:"type"`
 	Resolved      any                 `json:"resolved"` // ?
 	Options       OptionsInteractions `json:"options"`
-	CustomID      Snowflake           `json:"custom_id"`
-	ComponentType int                 `json:"component_type"`
+	CustomID      string              `json:"custom_id"`
+	ComponentType ComponentType       `json:"component_type"`
 	Values        []any               `json:"values"` // ?
 	TagetID       Snowflake           `json:"target_id"`
 }

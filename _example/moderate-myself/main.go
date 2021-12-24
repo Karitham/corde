@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
+	"sync"
 
 	"github.com/Karitham/corde"
 )
@@ -51,9 +51,14 @@ func main() {
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 
+	mu := &sync.Mutex{}
+	selectedID := 0
+
 	m := corde.NewMux(pk, appID, token)
 	m.SetRoute(corde.SlashCommand("cmd/list"), list(m, g))
 	m.SetRoute(corde.SlashCommand("cmd/remove"), rm(m, g))
+	m.SetRoute(corde.ButtonInteraction("btn-cmd/list/next"), btnNext(m, g, mu, &selectedID))
+	m.SetRoute(corde.ButtonInteraction("btn-cmd/list/remove"), btnRemove(m, g, mu, &selectedID))
 
 	if err := m.RegisterCommand(command, g); err != nil {
 		log.Fatalln("error registering command: ", err)
@@ -66,19 +71,23 @@ func main() {
 
 func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Interaction) {
 	return func(w corde.ResponseWriter, i *corde.Interaction) {
-		c, _ := m.GetCommands(g)
-
 		w.WithSource(&corde.InteractionRespData{
-			Content: func() string {
-				s := &strings.Builder{}
-				s.WriteString("```\n")
-				for _, c := range c {
-					s.WriteString(fmt.Sprintf("%s: %s\n", c.Name, c.Description))
-				}
-				s.WriteString("```")
-				return s.String()
-			}(),
-			Flags: corde.RESPONSE_FLAGS_EPHEMERAL,
+			Components: []corde.Component{
+				{
+					Type: corde.COMPONENT_ACTION_ROW,
+					Components: []corde.Component{
+						{
+							Type:     corde.COMPONENT_BUTTON,
+							CustomID: "btn-cmd/list/next",
+							Style:    corde.BUTTON_SECONDARY,
+							Label:    "next",
+							Emoji:    &corde.Emoji{Name: "➡️"},
+						},
+					},
+				},
+			},
+			Content: fmt.Sprintf("Click on the buttons to move between existing commands and or delete them."),
+			Flags:   corde.RESPONSE_FLAGS_EPHEMERAL,
 		})
 	}
 }
@@ -110,6 +119,85 @@ func rm(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *co
 		w.WithSource(&corde.InteractionRespData{
 			Content: fmt.Sprintf("No command named %s found.", n),
 			Flags:   corde.RESPONSE_FLAGS_EPHEMERAL,
+		})
+	}
+}
+
+func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Interaction) {
+	return func(w corde.ResponseWriter, i *corde.Interaction) {
+		mu.Lock()
+		defer mu.Unlock()
+		commands, _ := m.GetCommands(g)
+		if len(commands) == 0 {
+			w.UpdateMessage(&corde.InteractionRespData{
+				Content: "No commands found.",
+				Flags:   corde.RESPONSE_FLAGS_EPHEMERAL,
+			})
+			return
+		}
+		*selectedID = *selectedID + 1%(len(commands))
+
+		w.UpdateMessage(&corde.InteractionRespData{
+			Content: fmt.Sprintf("%s - %s", commands[*selectedID].Name, commands[*selectedID].Description),
+			Components: []corde.Component{
+				{
+					Type: corde.COMPONENT_ACTION_ROW,
+					Components: []corde.Component{
+						{
+							Type:     corde.COMPONENT_BUTTON,
+							CustomID: "btn-cmd/list/next",
+							Style:    corde.BUTTON_SECONDARY,
+							Label:    "next",
+							Emoji:    &corde.Emoji{Name: "➡️"},
+						},
+						{
+							Type:     corde.COMPONENT_BUTTON,
+							CustomID: "btn-cmd/list/remove",
+							Style:    corde.BUTTON_DANGER,
+							Label:    "remove",
+							Emoji:    &corde.Emoji{Name: "🗑️"},
+						},
+					},
+				},
+			},
+			Flags: corde.RESPONSE_FLAGS_EPHEMERAL,
+		})
+	}
+}
+
+func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Interaction) {
+	return func(w corde.ResponseWriter, i *corde.Interaction) {
+		mu.Lock()
+		defer mu.Unlock()
+		commands, _ := m.GetCommands(g)
+		c := commands[*selectedID]
+
+		m.DeleteCommand(c.ID, g)
+
+		w.UpdateMessage(&corde.InteractionRespData{
+			Content: fmt.Sprintf("%s - %s", commands[*selectedID].Name, commands[*selectedID].Description),
+			Components: []corde.Component{
+				{
+					Type: corde.COMPONENT_ACTION_ROW,
+					Components: []corde.Component{
+						{
+							Type:     corde.COMPONENT_BUTTON,
+							CustomID: "btn-cmd/list/next",
+							Style:    corde.BUTTON_SECONDARY,
+							Label:    "next",
+							Emoji:    &corde.Emoji{Name: "➡️"},
+						},
+						{
+							Type:     corde.COMPONENT_BUTTON,
+							CustomID: "btn-cmd/list/remove",
+							Style:    corde.BUTTON_DANGER,
+							Label:    "remove",
+							Emoji:    &corde.Emoji{Name: "🗑️"},
+						},
+					},
+				},
+			},
+			Flags: corde.RESPONSE_FLAGS_EPHEMERAL,
 		})
 	}
 }

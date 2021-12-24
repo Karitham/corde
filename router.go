@@ -17,6 +17,10 @@ func SlashCommand(route string) InteractionCommand {
 	return InteractionCommand{Type: APPLICATION_COMMAND, Route: route}
 }
 
+func ButtonInteraction(customID string) InteractionCommand {
+	return InteractionCommand{Type: MESSAGE_COMPONENT, Route: customID}
+}
+
 // Mux is a discord gateway muxer, which handles the routing
 type Mux struct {
 	rMu        *sync.RWMutex
@@ -87,13 +91,13 @@ type ResponseWriter interface {
 func (m *Mux) ListenAndServe(addr string) error {
 	validator := Validate(m.PublicKey)
 	r := http.NewServeMux()
-	r.Handle(m.BasePath, validator(http.HandlerFunc(m.Route)))
+	r.Handle(m.BasePath, validator(http.HandlerFunc(m.route)))
 
 	return http.ListenAndServe(addr, r)
 }
 
-// Route handles routing the requests
-func (m *Mux) Route(w http.ResponseWriter, r *http.Request) {
+// route handles routing the requests
+func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
 	i := &Interaction{}
 	if err := json.NewDecoder(r.Body).Decode(i); err != nil {
 		log.Println("Errors unmarshalling json: ", err)
@@ -111,6 +115,23 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 	switch i.Type {
 	case PING:
 		r.pong()
+	case MESSAGE_COMPONENT:
+		if h, ok := m.routes[InteractionCommand{Type: i.Type, Route: i.Data.CustomID}]; ok {
+			h(r, i)
+			return
+		}
+
+		for optName := range i.Data.Options {
+			nr := InteractionCommand{Type: i.Type, Route: i.Data.Name + "/" + i.Data.CustomID}
+
+			if handler, ok := m.routes[nr]; ok {
+				i.Data.Name += "/" + optName
+				handler(r, i)
+				return
+			}
+		}
+
+		m.OnNotFound(r, i)
 	case APPLICATION_COMMAND:
 		fallthrough
 	case APPLICATION_COMMAND_AUTOCOMPLETE:
