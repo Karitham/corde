@@ -80,11 +80,7 @@ func main() {
 	m.SetRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Route: "todo/list"}, t.listHandler)
 
 	g := corde.Guild(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
-	for _, c := range commands {
-		if err := m.RegisterCommand(c, g); err != nil {
-			log.Fatalln("error registering command: ", err)
-		}
-	}
+	m.BulkRegisterCommand(commands, g)
 
 	if err := m.ListenAndServe(":8070"); err != nil {
 		log.Fatalln(err)

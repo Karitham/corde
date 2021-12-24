@@ -135,3 +135,63 @@ func (m *Mux) RegisterCommand(c Command, options ...func(*commandsOpt)) error {
 	}
 	return nil
 }
+
+func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*commandsOpt)) error {
+	opt := &commandsOpt{}
+	for _, option := range options {
+		option(opt)
+	}
+
+	b := &bytes.Buffer{}
+	if err := json.NewEncoder(b).Encode(c); err != nil {
+		return err
+	}
+
+	guild := ""
+	if opt.guildID != 0 {
+		guild = fmt.Sprintf("/guilds/%s", opt.guildID)
+	}
+
+	url := fmt.Sprintf("%s/applications/%d%s/commands", API, m.AppID, guild)
+
+	req, err := http.NewRequest(http.MethodPut, url, b)
+	if err != nil {
+		return err
+	}
+	reqOpts(req, m.authorize, contentTypeJSON)
+
+	resp, err := m.Client.Do(req)
+	if err != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {
+		buf := &bytes.Buffer{}
+		buf.ReadFrom(resp.Body)
+		return fmt.Errorf("error: %w, body: %s, code: %d", err, buf.String(), resp.StatusCode)
+	}
+	return nil
+}
+
+func (m *Mux) DeleteCommand(ID Snowflake, options ...func(*commandsOpt)) error {
+	opt := &commandsOpt{}
+	for _, option := range options {
+		option(opt)
+	}
+	guild := ""
+	if opt.guildID != 0 {
+		guild = fmt.Sprintf("/guilds/%s", opt.guildID)
+	}
+
+	url := fmt.Sprintf("%s/applications/%d%s/commands/%d", API, m.AppID, guild, ID)
+
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return err
+	}
+	reqOpts(req, m.authorize, contentTypeJSON)
+
+	resp, err := m.Client.Do(req)
+	if err != nil || resp.StatusCode != 404 && resp.StatusCode != 204 {
+		buf := &bytes.Buffer{}
+		buf.ReadFrom(resp.Body)
+		return fmt.Errorf("error: %w, body: %s, code: %d", err, buf.String(), resp.StatusCode)
+	}
+	return nil
+}

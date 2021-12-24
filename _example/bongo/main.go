@@ -8,12 +8,10 @@ import (
 	"github.com/Karitham/corde"
 )
 
-var commands = []corde.Command{
-	corde.Command{
-		Name:        "bongo",
-		Description: "send a big bongo",
-		Type:        corde.COMMAND_CHAT_INPUT,
-	},
+var command = corde.Command{
+	Name:        "bongo",
+	Description: "send a big bongo",
+	Type:        corde.COMMAND_CHAT_INPUT,
 }
 
 func main() {
@@ -34,10 +32,8 @@ func main() {
 	m.SetRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Route: "bongo"}, bongoHandler)
 
 	g := corde.Guild(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
-	for _, c := range commands {
-		if err := m.RegisterCommand(c, g); err != nil {
-			log.Fatalln("error registering command: ", err)
-		}
+	if err := m.RegisterCommand(command, g); err != nil {
+		log.Fatalln("error registering command: ", err)
 	}
 
 	if err := m.ListenAndServe(":8070"); err != nil {
