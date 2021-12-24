@@ -69,15 +69,64 @@ type Interaction struct {
 }
 
 type InteractionData struct {
-	ID            Snowflake     `json:"id"`
-	Name          string        `json:"name"`
-	Type          int           `json:"type"`
-	Resolved      interface{}   `json:"resolved"` // ?
-	Options       []Option      `json:"options"`
-	CustomID      Snowflake     `json:"custom_id"`
-	ComponentType int           `json:"component_type"`
-	Values        []interface{} `json:"values"` // ?
-	TagetID       Snowflake     `json:"target_id"`
+	ID            Snowflake           `json:"id"`
+	Name          string              `json:"name"`
+	Type          int                 `json:"type"`
+	Resolved      any                 `json:"resolved"` // ?
+	Options       OptionsInteractions `json:"options"`
+	CustomID      Snowflake           `json:"custom_id"`
+	ComponentType int                 `json:"component_type"`
+	Values        []any               `json:"values"` // ?
+	TagetID       Snowflake           `json:"target_id"`
+}
+
+type OptionsInteractions map[string]any
+
+func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
+	type opt struct {
+		Name    string     `json:"name"`
+		Value   any        `json:"value"`
+		Type    OptionType `json:"type"`
+		Options []opt      `json:"options"`
+	}
+
+	var opts []opt
+	if err := json.Unmarshal(b, &opts); err != nil {
+		return err
+	}
+
+	// max is 3 deep, as per discord's docs
+	m := make(map[string]any)
+	for _, opt := range opts {
+		m[opt.Name] = opt.Value
+		for _, opt2 := range opt.Options {
+			m[opt2.Name] = opt2.Value
+			for _, opt3 := range opt2.Options {
+				m[opt3.Name] = opt3.Value
+			}
+		}
+	}
+
+	*o = m
+	return nil
+}
+
+func (o OptionsInteractions) MarshalJSON() ([]byte, error) {
+	type opt struct {
+		Name  string `json:"name"`
+		Value any    `json:"value"`
+	}
+
+	var opts []opt = make([]opt, len(o))
+	for k, v := range o {
+		opts = append(opts, opt{k, v})
+	}
+	b, err := json.Marshal(&opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
 
 type Member struct {

@@ -10,10 +10,11 @@ import (
 )
 
 type InteractionCommand struct {
-	Type InteractionType `json:"type"`
-	Name string          `json:"name"`
+	Type  InteractionType `json:"type"`
+	Route string          `json:"name"`
 }
 
+// Mux is a discord gateway muxer, which handles the routing
 type Mux struct {
 	rMu        *sync.RWMutex
 	routes     map[InteractionCommand]Handler
@@ -25,16 +26,29 @@ type Mux struct {
 	BotToken   string
 }
 
+// Routes return the discord routes mounted on the mux
+// DO NOT EDIT THOSE, IN RISK OF HAVING ROUTING ISSUES
 func (m *Mux) Routes() map[InteractionCommand]Handler {
 	return m.routes
 }
 
-func (m *Mux) AddRoute(command InteractionCommand, handler Handler) {
+// Lock the mux, to be able to mount or unmount routes
+func (m *Mux) Lock() {
 	m.rMu.Lock()
-	m.routes[command] = handler
+}
+
+// Unlock the mux, so it can route again
+func (m *Mux) Unlock() {
 	m.rMu.Unlock()
 }
 
+func (m *Mux) SetRoute(command InteractionCommand, handler Handler) {
+	m.rMu.Lock()
+	defer m.rMu.Unlock()
+	m.routes[command] = handler
+}
+
+// NewMux returns a new mux for routing slash commands
 func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 	return &Mux{
 		rMu:       &sync.RWMutex{},
@@ -42,7 +56,7 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		PublicKey: publicKey,
 		BasePath:  "/",
 		OnNotFound: func(_ ResponseWriter, i *Interaction) {
-			log.Println("no handler for", i.Type, i.Data.Name)
+			log.Printf("No handler for registered command: %s\n", i.Data.Name)
 		},
 		Client: &http.Client{
 			Timeout: 10 * time.Second,
@@ -52,13 +66,21 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 	}
 }
 
+// Handler handles incoming requests
 type Handler func(ResponseWriter, *Interaction)
 
+// ResponseWriter handles responding to interactions
+// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
 type ResponseWriter interface {
-	Pong()
-	ChannelMessageWithSource(i InteractionResponseData)
+	pong()
+	WithSource(i *InteractionRespData)
+	DeferedWithSource(i *InteractionRespData)
+	UpdateMessage(i *InteractionRespData)
+	DeferedUpdateMessage(i *InteractionRespData)
+	AutocompleteResult(i *InteractionRespData)
 }
 
+// ListenAndServe starts the gateway listening to events
 func (m *Mux) ListenAndServe(addr string) error {
 	validator := Validate(m.PublicKey)
 	r := http.NewServeMux()
@@ -67,33 +89,50 @@ func (m *Mux) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, r)
 }
 
+// Route handles routing the requests
 func (m *Mux) Route(w http.ResponseWriter, r *http.Request) {
 	i := &Interaction{}
 	if err := json.NewDecoder(r.Body).Decode(i); err != nil {
-		log.Println("errors unmarshalling json:", err)
+		log.Println("Errors unmarshalling json: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	rsp := &Responder{w: w}
+	m.routeReq(&Responder{w: w}, i)
+}
+
+// routeReq is a recursive implementation to route requests
+func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
+	m.rMu.RLock()
+	defer m.rMu.RUnlock()
 	switch i.Type {
 	case PING:
-		rsp.Pong()
+		r.pong()
 	case APPLICATION_COMMAND:
 		fallthrough
 	case APPLICATION_COMMAND_AUTOCOMPLETE:
-		m.rMu.RLock()
-		defer m.rMu.RUnlock()
-		if h, ok := m.routes[InteractionCommand{Type: i.Type, Name: i.Data.Name}]; ok {
-			h(rsp, i)
+		if h, ok := m.routes[InteractionCommand{Type: i.Type, Route: i.Data.Name}]; ok {
+			h(r, i)
 			return
 		}
 
-		m.OnNotFound(rsp, i)
+		for optName := range i.Data.Options {
+			nr := InteractionCommand{Type: i.Type, Route: i.Data.Name + "/" + optName}
+
+			if handler, ok := m.routes[nr]; ok {
+				i.Data.Name += "/" + optName
+				handler(r, i)
+				return
+			}
+		}
+
+		m.OnNotFound(r, i)
 	}
 }
 
-func (m *Mux) applyOpt(req *http.Request, h ...func(*http.Request)) {
+// reqOpts applies functions on an http request.
+// useful for setting headers
+func reqOpts(req *http.Request, h ...func(*http.Request)) {
 	for _, option := range h {
 		option(req)
 	}
@@ -103,6 +142,6 @@ func (m *Mux) authorize(req *http.Request) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bot %s", m.BotToken))
 }
 
-func (m *Mux) contentTypeJSON(req *http.Request) {
+func contentTypeJSON(req *http.Request) {
 	req.Header.Add("Content-Type", "application/json")
 }

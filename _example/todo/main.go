@@ -9,40 +9,47 @@ import (
 )
 
 var commands = []corde.Command{
-	{
-		Name:        "list",
-		Description: "list todos",
-		Type:        corde.COMMAND_CHAT_INPUT,
-	},
-	{
-		Name:        "add",
-		Description: "add a todo",
+	corde.Command{
+		Name:        "todo",
+		Description: "view edit and remove todos",
 		Type:        corde.COMMAND_CHAT_INPUT,
 		Options: []corde.Option{
 			{
-				Name:        "name",
-				Type:        corde.OPTION_STRING,
-				Description: "todo name",
-				Required:    true,
+				Name:        "list",
+				Description: "list todos",
+				Type:        corde.OPTION_SUB_COMMAND,
 			},
 			{
-				Name:        "value",
-				Type:        corde.OPTION_STRING,
-				Description: "todo value",
-				Required:    true,
+				Name:        "add",
+				Description: "add a todo",
+				Type:        corde.OPTION_SUB_COMMAND,
+				Options: []corde.Option{
+					{
+						Name:        "name",
+						Type:        corde.OPTION_STRING,
+						Description: "todo name",
+						Required:    true,
+					},
+					{
+						Name:        "value",
+						Type:        corde.OPTION_STRING,
+						Description: "todo value",
+						Required:    true,
+					},
+				},
 			},
-		},
-	},
-	{
-		Name:        "rm",
-		Description: "remove a todo",
-		Type:        corde.COMMAND_CHAT_INPUT,
-		Options: []corde.Option{
 			{
-				Name:        "name",
-				Type:        corde.OPTION_STRING,
-				Description: "todo name",
-				Required:    true,
+				Name:        "rm",
+				Description: "remove a todo",
+				Type:        corde.OPTION_SUB_COMMAND,
+				Options: []corde.Option{
+					{
+						Name:        "name",
+						Type:        corde.OPTION_STRING,
+						Description: "todo name",
+						Required:    true,
+					},
+				},
 			},
 		},
 	},
@@ -68,9 +75,9 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.AddRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Name: "add"}, t.addHandler)
-	m.AddRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Name: "rm"}, t.removeHandler)
-	m.AddRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Name: "list"}, t.listHandler)
+	m.SetRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Route: "todo/add"}, t.addHandler)
+	m.SetRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Route: "todo/rm"}, t.removeHandler)
+	m.SetRoute(corde.InteractionCommand{Type: corde.APPLICATION_COMMAND, Route: "todo/list"}, t.listHandler)
 
 	g := corde.Guild(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	for _, c := range commands {

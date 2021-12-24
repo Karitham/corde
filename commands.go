@@ -47,7 +47,7 @@ type Command struct {
 type Option struct {
 	Name        string        `json:"name"`
 	Type        OptionType    `json:"type"`
-	Value       interface{}   `json:"value"`
+	Value       any           `json:"value"`
 	Description string        `json:"description,omitempty"`
 	Required    bool          `json:"required,omitempty"`
 	Options     []Option      `json:"options,omitempty"`
@@ -125,7 +125,7 @@ func (m *Mux) RegisterCommand(c Command, options ...func(*commandsOpt)) error {
 	if err != nil {
 		return err
 	}
-	m.applyOpt(req, m.authorize, m.contentTypeJSON)
+	reqOpts(req, m.authorize, contentTypeJSON)
 
 	resp, err := m.Client.Do(req)
 	if err != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {

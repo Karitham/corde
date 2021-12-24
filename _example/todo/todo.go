@@ -14,45 +14,43 @@ type todo struct {
 }
 
 func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Interaction) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	value := ""
-	name := ""
-	for _, opt := range i.Data.Options {
-		switch opt.Name {
-		case "name":
-			name = opt.Value.(string)
-		case "value":
-			value = opt.Value.(string)
-		}
+	value, ok := i.Data.Options["value"].(string)
+	if !ok {
+		ephemeral(w, "no value provided")
+		return
 	}
 
+	name, ok := i.Data.Options["name"].(string)
+	if !ok {
+		ephemeral(w, "no name provided")
+		return
+	}
+
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	t.list[name] = value
 
-	w.ChannelMessageWithSource(corde.InteractionResponseData{
-		Content: corde.Opt(fmt.Sprintf("Sucessfully added %s", name)),
-		Flags:   corde.RESPONSE_FLAGS_EPHEMERAL,
-	})
+	ephemeral(w, fmt.Sprintf("Sucessfully added %s", name))
 }
 
 func (t *todo) listHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	s := &strings.Builder{}
-
 	if len(t.list) == 0 {
-		s.WriteString("No todos")
-	} else {
-		s.WriteString("```todo\n")
-		for k, v := range t.list {
-			s.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
-		}
-		s.WriteString("```")
+		ephemeral(w, "no todos")
+		return
 	}
 
-	w.ChannelMessageWithSource(corde.InteractionResponseData{
+	// build todo list
+	s := &strings.Builder{}
+	s.WriteString("```todo\n")
+	for k, v := range t.list {
+		s.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
+	}
+	s.WriteString("```")
+
+	w.WithSource(&corde.InteractionRespData{
 		Embeds: []corde.Embed{
 			{
 				Title:       "Todo list",
@@ -66,17 +64,20 @@ func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	name := ""
-	for _, opt := range i.Data.Options {
-		if opt.Name == "name" {
-			name = opt.Value.(string)
-		}
+	name, ok := i.Data.Options["name"].(string)
+	if !ok {
+		ephemeral(w, "no name provided")
+		return
 	}
 
 	delete(t.list, name)
+	ephemeral(w, "deleted todo")
+}
 
-	w.ChannelMessageWithSource(corde.InteractionResponseData{
-		Content: corde.Opt("deleted todo"),
+// ephemeral returns an ephemeral response
+func ephemeral(w corde.ResponseWriter, message string) {
+	w.WithSource(&corde.InteractionRespData{
+		Content: message,
 		Flags:   corde.RESPONSE_FLAGS_EPHEMERAL,
 	})
 }
