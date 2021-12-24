@@ -55,10 +55,10 @@ func main() {
 	selectedID := 0
 
 	m := corde.NewMux(pk, appID, token)
-	m.SetRoute(corde.SlashCommand("cmd/list"), list(m, g))
-	m.SetRoute(corde.SlashCommand("cmd/remove"), rm(m, g))
-	m.SetRoute(corde.ButtonInteraction("btn-cmd/list/next"), btnNext(m, g, mu, &selectedID))
-	m.SetRoute(corde.ButtonInteraction("btn-cmd/list/remove"), btnRemove(m, g, mu, &selectedID))
+	m.Mount(corde.SlashCommand("cmd/list"), list(m, g))
+	m.Mount(corde.SlashCommand("cmd/remove"), rm(m, g))
+	m.Mount(corde.ButtonInteraction("btn-cmd/list/next"), btnNext(m, g, mu, &selectedID))
+	m.Mount(corde.ButtonInteraction("btn-cmd/list/remove"), btnRemove(m, g, mu, &selectedID))
 
 	if err := m.RegisterCommand(command, g); err != nil {
 		log.Fatalln("error registering command: ", err)

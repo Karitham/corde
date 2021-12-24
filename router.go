@@ -49,7 +49,7 @@ func (m *Mux) Unlock() {
 	m.rMu.Unlock()
 }
 
-func (m *Mux) SetRoute(command InteractionCommand, handler Handler) {
+func (m *Mux) Mount(command InteractionCommand, handler Handler) {
 	m.rMu.Lock()
 	defer m.rMu.Unlock()
 	m.routes[command] = handler

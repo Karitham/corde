@@ -29,7 +29,7 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.SetRoute(corde.SlashCommand("bongo"), bongoHandler)
+	m.Mount(corde.SlashCommand("bongo"), bongoHandler)
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	if err := m.RegisterCommand(command, g); err != nil {
