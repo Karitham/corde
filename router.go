@@ -80,11 +80,11 @@ type Handler func(ResponseWriter, *Interaction)
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
 type ResponseWriter interface {
 	pong()
-	WithSource(i *InteractionRespData)
-	DeferedWithSource(i *InteractionRespData)
-	UpdateMessage(i *InteractionRespData)
-	DeferedUpdateMessage(i *InteractionRespData)
-	AutocompleteResult(i *InteractionRespData)
+	Respond(i *InteractionRespData)
+	DeferedRespond(i *InteractionRespData)
+	Update(i *InteractionRespData)
+	DeferedUpdate(i *InteractionRespData)
+	Autocomplete(i *InteractionRespData)
 }
 
 // ListenAndServe starts the gateway listening to events

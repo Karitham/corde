@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+// Responder losely maps to the discord gateway response
+// https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
 type Responder struct {
 	w http.ResponseWriter
 }
@@ -26,28 +28,28 @@ func (r *Responder) pong() {
 	json.NewEncoder(r.w).Encode(intResponse{Type: 1})
 }
 
-// WithSource responds to the interaction directly
-func (r *Responder) WithSource(i *InteractionRespData) {
+// Respond responds to the interaction directly
+func (r *Responder) Respond(i *InteractionRespData) {
 	r.respond(intResponse{Type: 4, Data: i})
 }
 
-// DeferedWithSource responds in defered
-func (r *Responder) DeferedWithSource(i *InteractionRespData) {
+// DeferedRespond responds in defered
+func (r *Responder) DeferedRespond(i *InteractionRespData) {
 	r.respond(intResponse{Type: 5, Data: i})
 }
 
-// UpdateMessage updates the target message
-func (r *Responder) UpdateMessage(i *InteractionRespData) {
+// Update updates the target message
+func (r *Responder) Update(i *InteractionRespData) {
 	r.respond(intResponse{Type: 7, Data: i})
 }
 
-// DeferedUpdateMessage updates the target message in defered
-func (r *Responder) DeferedUpdateMessage(i *InteractionRespData) {
+// DeferedUpdate updates the target message in defered
+func (r *Responder) DeferedUpdate(i *InteractionRespData) {
 	r.respond(intResponse{Type: 6, Data: i})
 }
 
-// AutocompleteResult responds to the interaction with autocomplete data
-func (r *Responder) AutocompleteResult(i *InteractionRespData) {
+// Autocomplete responds to the interaction with autocomplete data
+func (r *Responder) Autocomplete(i *InteractionRespData) {
 	r.respond(intResponse{Type: 8, Data: i})
 }
 

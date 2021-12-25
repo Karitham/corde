@@ -44,17 +44,15 @@ func main() {
 func bongoHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	resp, err := http.Get("https://cdn.discordapp.com/emojis/745709799890747434.gif?size=128")
 	if err != nil {
-		w.WithSource(&corde.InteractionRespData{Content: "couldn't retrieve bongo", Flags: corde.RESPONSE_FLAGS_EPHEMERAL})
+		w.Respond(corde.NewResp().Content("couldn't retrieve bongo").Ephemeral().B())
 		return
 	}
 	defer resp.Body.Close()
-	w.WithSource(&corde.InteractionRespData{
-		Attachements: []corde.Attachment{
-			{
-				Body:     resp.Body,
-				ID:       corde.Snowflake(0),
-				Filename: "bongo.gif",
-			},
-		},
-	})
+	w.Respond(corde.NewResp().
+		Attachements(corde.Attachment{
+			Body:     resp.Body,
+			ID:       corde.Snowflake(0),
+			Filename: "bongo.gif",
+		}).B(),
+	)
 }
