@@ -1,5 +1,7 @@
 package corde
 
+import "fmt"
+
 // Embed builder
 // https://regex101.com/r/gmVH2A/3
 type EmbedB struct {
@@ -40,8 +42,18 @@ func (b *EmbedB) Title(s string) *EmbedB {
 	return b
 }
 
+func (b *EmbedB) Titlef(format string, a ...any) *EmbedB {
+	b.Embed.Title = fmt.Sprintf(format, a...)
+	return b
+}
+
 func (b *EmbedB) Description(s string) *EmbedB {
 	b.Embed.Description = s
+	return b
+}
+
+func (b *EmbedB) Descriptionf(format string, a ...any) *EmbedB {
+	b.Embed.Description = fmt.Sprintf(format, a...)
 	return b
 }
 

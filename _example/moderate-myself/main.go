@@ -97,13 +97,7 @@ func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *
 
 func rm(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Interaction) {
 	return func(w corde.ResponseWriter, i *corde.Interaction) {
-		n, ok := i.Data.Options["name"]
-		if !ok {
-			w.Respond(
-				corde.NewResp().Content("Please enter an actual command name.").Ephemeral().B(),
-			)
-			return
-		}
+		n := i.Data.Options.String("name")
 
 		c, _ := m.GetCommands(g)
 		for _, c := range c {

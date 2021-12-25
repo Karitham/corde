@@ -84,8 +84,3 @@ type Image struct {
 type MessageReference struct {
 	MessageID string `json:"message_id"`
 }
-
-// Opt returns a ptr to the type
-func Opt[T any](t T) *T {
-	return &t
-}

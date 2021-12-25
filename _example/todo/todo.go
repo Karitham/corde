@@ -14,17 +14,8 @@ type todo struct {
 }
 
 func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Interaction) {
-	value, ok := i.Data.Options["value"].(string)
-	if !ok {
-		w.Respond(corde.NewResp().Content("no value provided").Ephemeral().B())
-		return
-	}
-
-	name, ok := i.Data.Options["name"].(string)
-	if !ok {
-		w.Respond(corde.NewResp().Content("no name provided").Ephemeral().B())
-		return
-	}
+	value := i.Data.Options.String("value")
+	name := i.Data.Options.String("name")
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -67,11 +58,7 @@ func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	name, ok := i.Data.Options["name"].(string)
-	if !ok {
-		w.Respond(corde.NewResp().Content("no name provided").Ephemeral().B())
-		return
-	}
+	name := i.Data.Options.String("name")
 
 	delete(t.list, name)
 	w.Respond(corde.NewResp().Content("deleted todo").Ephemeral().B())
