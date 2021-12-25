@@ -18,19 +18,6 @@ var command = corde.Command{
 			Type:        corde.OPTION_SUB_COMMAND,
 			Description: "list existing slash commands",
 		},
-		{
-			Name:        "remove",
-			Type:        corde.OPTION_SUB_COMMAND,
-			Description: "remove slash commands",
-			Options: []corde.Option{
-				{
-					Name:        "name",
-					Type:        corde.OPTION_STRING,
-					Description: "name of the slash command you wish to remove",
-					Required:    true,
-				},
-			},
-		},
 	},
 }
 
@@ -54,10 +41,9 @@ func main() {
 	selectedID := 0
 
 	m := corde.NewMux(pk, appID, token)
-	m.Mount(corde.SlashCommand("cmd/list"), list(m, g))
-	m.Mount(corde.SlashCommand("cmd/remove"), rm(m, g))
-	m.Mount(corde.ButtonInteraction("btn-cmd/list/next"), btnNext(m, g, mu, &selectedID))
-	m.Mount(corde.ButtonInteraction("btn-cmd/list/remove"), btnRemove(m, g, mu, &selectedID))
+	m.Command("cmd/list", list(m, g))
+	m.Button("cmd/list/next", btnNext(m, g, mu, &selectedID))
+	m.Button("cmd/list/remove", btnRemove(m, g, mu, &selectedID))
 
 	if err := m.RegisterCommand(command, g); err != nil {
 		log.Fatalln("error registering command: ", err)
@@ -70,17 +56,17 @@ func main() {
 
 var nextBtn = corde.Component{
 	Type:     corde.COMPONENT_BUTTON,
-	CustomID: "btn-cmd/list/next",
+	CustomID: "cmd/list/next",
 	Style:    corde.BUTTON_SECONDARY,
-	Label:    "next",
+	Label:    "Next",
 	Emoji:    &corde.Emoji{Name: "➡️"},
 }
 
 var delBtn = corde.Component{
 	Type:     corde.COMPONENT_BUTTON,
-	CustomID: "btn-cmd/list/remove",
+	CustomID: "cmd/list/remove",
 	Style:    corde.BUTTON_DANGER,
-	Label:    "remove",
+	Label:    "Delete",
 	Emoji:    &corde.Emoji{Name: "🗑️"},
 }
 
@@ -92,23 +78,6 @@ func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *
 			Content("Click on the buttons to move between existing commands and or delete them.").
 			B(),
 		)
-	}
-}
-
-func rm(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Interaction) {
-	return func(w corde.ResponseWriter, i *corde.Interaction) {
-		n := i.Data.Options.String("name")
-
-		c, _ := m.GetCommands(g)
-		for _, c := range c {
-			if c.Name == n {
-				m.DeleteCommand(c.ID, g)
-				w.Respond(corde.NewResp().Content("No command named %s found.", n).Ephemeral().B())
-				return
-			}
-		}
-
-		w.Respond(corde.NewResp().Contentf("No command named %s found.", n).Ephemeral().B())
 	}
 }
 

@@ -75,9 +75,9 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.Mount(corde.SlashCommand("todo/add"), t.addHandler)
-	m.Mount(corde.SlashCommand("todo/rm"), t.removeHandler)
-	m.Mount(corde.SlashCommand("todo/list"), t.listHandler)
+	m.Command("todo/add", t.addHandler)
+	m.Command("todo/rm", t.removeHandler)
+	m.Command("todo/list", t.listHandler)
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	m.BulkRegisterCommand(commands, g)

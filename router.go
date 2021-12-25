@@ -6,37 +6,26 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	radix "github.com/akrennmair/go-radix"
 )
 
-type InteractionCommand struct {
-	Type  InteractionType `json:"type"`
-	Route string          `json:"name"`
-}
-
-func SlashCommand(route string) InteractionCommand {
-	return InteractionCommand{Type: APPLICATION_COMMAND, Route: route}
-}
-
-func ButtonInteraction(customID string) InteractionCommand {
-	return InteractionCommand{Type: MESSAGE_COMPONENT, Route: customID}
+type routes struct {
+	command      *radix.Tree[Handler]
+	autocomplete *radix.Tree[Handler]
+	component    *radix.Tree[Handler]
 }
 
 // Mux is a discord gateway muxer, which handles the routing
 type Mux struct {
 	rMu        *sync.RWMutex
-	routes     map[InteractionCommand]Handler
+	routes     routes
 	PublicKey  string // the hex public key provided by discord
 	BasePath   string // base route path, default is "/"
 	OnNotFound Handler
 	Client     *http.Client
 	AppID      Snowflake
 	BotToken   string
-}
-
-// Routes return the discord routes mounted on the mux
-// DO NOT EDIT THOSE, IN RISK OF HAVING ROUTING ISSUES
-func (m *Mux) Routes() map[InteractionCommand]Handler {
-	return m.routes
 }
 
 // Lock the mux, to be able to mount or unmount routes
@@ -49,17 +38,53 @@ func (m *Mux) Unlock() {
 	m.rMu.Unlock()
 }
 
-func (m *Mux) Mount(command InteractionCommand, handler Handler) {
+func (m *Mux) Mount(typ InteractionType, route string, handler Handler) {
 	m.rMu.Lock()
 	defer m.rMu.Unlock()
-	m.routes[command] = handler
+
+	switch typ {
+	case APPLICATION_COMMAND:
+		m.routes.command.Insert(route, &handler)
+	case APPLICATION_COMMAND_AUTOCOMPLETE:
+		m.routes.autocomplete.Insert(route, &handler)
+	case MESSAGE_COMPONENT:
+		m.routes.component.Insert(route, &handler)
+	}
+}
+
+// Button mounts a button route on the mux
+func (m *Mux) Button(route string, handler Handler) {
+	m.rMu.Lock()
+	defer m.rMu.Unlock()
+	m.routes.component.Insert(route, &handler)
+}
+
+// Autocomplete mounts an autocomplete route on the mux
+func (m *Mux) Autocomplete(route string, handler Handler) {
+	m.rMu.Lock()
+	defer m.rMu.Unlock()
+	m.routes.autocomplete.Insert(route, &handler)
+}
+
+// Command mounts a slash command route on the mux
+func (m *Mux) Command(route string, handler Handler) {
+	m.rMu.Lock()
+	defer m.rMu.Unlock()
+	m.routes.command.Insert(route, &handler)
 }
 
 // NewMux returns a new mux for routing slash commands
+//
+// When you mount a command on the mux, it's prefix based routed,
+// which means you can route to a button like `/list/next/456132153` having mounted `/list/next`
 func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 	return &Mux{
-		rMu:       &sync.RWMutex{},
-		routes:    make(map[InteractionCommand]Handler),
+		rMu: &sync.RWMutex{},
+		routes: routes{
+			command:      radix.New[Handler](),
+			autocomplete: radix.New[Handler](),
+			component:    radix.New[Handler](),
+		},
 		PublicKey: publicKey,
 		BasePath:  "/",
 		OnNotFound: func(_ ResponseWriter, i *Interaction) {
@@ -116,42 +141,28 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 	case PING:
 		r.pong()
 	case MESSAGE_COMPONENT:
-		if h, ok := m.routes[InteractionCommand{Type: i.Type, Route: i.Data.CustomID}]; ok {
-			h(r, i)
+		if _, h, ok := m.routes.component.LongestPrefix(i.Data.CustomID); ok {
+			(*h)(r, i)
 			return
 		}
-
-		for optName := range i.Data.Options {
-			nr := InteractionCommand{Type: i.Type, Route: i.Data.Name + "/" + i.Data.CustomID}
-
-			if handler, ok := m.routes[nr]; ok {
-				i.Data.Name += "/" + optName
-				handler(r, i)
-				return
-			}
-		}
-
-		m.OnNotFound(r, i)
 	case APPLICATION_COMMAND:
-		fallthrough
-	case APPLICATION_COMMAND_AUTOCOMPLETE:
-		if h, ok := m.routes[InteractionCommand{Type: i.Type, Route: i.Data.Name}]; ok {
-			h(r, i)
+		if _, h, ok := m.routes.command.LongestPrefix(i.Data.Name); ok {
+			(*h)(r, i)
 			return
 		}
-
 		for optName := range i.Data.Options {
-			nr := InteractionCommand{Type: i.Type, Route: i.Data.Name + "/" + optName}
-
-			if handler, ok := m.routes[nr]; ok {
-				i.Data.Name += "/" + optName
-				handler(r, i)
+			nr := i.Data.Name + "/" + optName
+			if _, h, ok := m.routes.command.LongestPrefix(nr); ok {
+				i.Data.Name = nr
+				(*h)(r, i)
 				return
 			}
 		}
-
-		m.OnNotFound(r, i)
+	case APPLICATION_COMMAND_AUTOCOMPLETE:
+		log.Println("unimplemented autocomplete")
+		r.Respond(NewResp().Ephemeral().Content("unimplemented autocomplete").B())
 	}
+	m.OnNotFound(r, i)
 }
 
 // reqOpts applies functions on an http request.
