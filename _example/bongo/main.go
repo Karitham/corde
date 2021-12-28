@@ -49,7 +49,7 @@ func bongoHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	}
 	defer resp.Body.Close()
 	w.Respond(corde.NewResp().
-		Attachements(corde.Attachment{
+		Attachments(corde.Attachment{
 			Body:     resp.Body,
 			ID:       corde.Snowflake(0),
 			Filename: "bongo.gif",

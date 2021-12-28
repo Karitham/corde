@@ -9,7 +9,7 @@ import (
 )
 
 var commands = []corde.Command{
-	corde.Command{
+	{
 		Name:        "todo",
 		Description: "view edit and remove todos",
 		Type:        corde.COMMAND_CHAT_INPUT,

@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// Validate is a middleware to validate Interaction payloads
 func Validate(publicKey string) func(http.Handler) http.Handler {
 	pk, err := hex.DecodeString(publicKey)
 	if err != nil {
