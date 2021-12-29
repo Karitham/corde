@@ -75,12 +75,16 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.Command("todo/add", t.addHandler)
-	m.Command("todo/rm", t.removeHandler)
-	m.Command("todo/list", t.listHandler)
+	m.Route("todo", func(m *corde.Mux) {
+		m.Command("add", t.addHandler)
+		m.Command("rm", t.removeHandler)
+		m.Command("list", t.listHandler)
+	})
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
-	m.BulkRegisterCommand(commands, g)
+	if err := m.BulkRegisterCommand(commands, g); err != nil {
+		log.Fatalln(err)
+	}
 
 	if err := m.ListenAndServe(":8070"); err != nil {
 		log.Fatalln(err)
