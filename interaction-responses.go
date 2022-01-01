@@ -11,7 +11,7 @@ type InteractionRespData struct {
 	AllowedMentions *AllowedMentions `json:"allowed_mentions,omitempty"`
 	Flags           IntResponseFlags `json:"flags,omitempty"`
 	Components      []Component      `json:"components,omitempty"`
-	Attachements    []Attachment     `json:"attachments,omitempty"`
+	Attachments     []Attachment     `json:"attachments,omitempty"`
 }
 
 type IntResponseFlags uint

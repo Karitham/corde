@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// Responder losely maps to the discord gateway response
+// Responder loosely maps to the discord gateway response
 // https://discord.com/developers/docs/interactions/receiving-and-responding#responding-to-an-interaction
 type Responder struct {
 	w http.ResponseWriter
@@ -60,7 +60,7 @@ func (r *Responder) respond(i intResponse) {
 		return
 	}
 
-	if len(i.Data.Attachements) < 1 {
+	if len(i.Data.Attachments) < 1 {
 		r.w.Header().Set("content-type", "application/json")
 		payloadJSON.WriteTo(r.w)
 		return
@@ -72,7 +72,7 @@ func (r *Responder) respond(i intResponse) {
 	r.w.Header().Set("Content-Type", mw.FormDataContentType())
 	mw.WriteField("payload_json", payloadJSON.String())
 
-	for i, f := range i.Data.Attachements {
+	for i, f := range i.Data.Attachments {
 		if f.ID == 0 {
 			f.ID = Snowflake(i)
 		}

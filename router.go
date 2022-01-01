@@ -41,6 +41,7 @@ func (m *Mux) Unlock() {
 	m.rMu.Unlock()
 }
 
+// Mount is for mounting a Handler on the Mux
 func (m *Mux) Mount(typ InteractionType, route string, handler Handler) {
 	m.rMu.Lock()
 	defer m.rMu.Unlock()
@@ -197,6 +198,7 @@ func reqOpts(req *http.Request, h ...func(*http.Request)) {
 	}
 }
 
+// authorize adds the Authorization header to the request
 func (m *Mux) authorize(req *http.Request) {
 	req.Header.Add("Authorization", "Bot "+m.BotToken)
 }

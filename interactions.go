@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// InteractionType is the type of interaction
 type InteractionType int
 
 const (
@@ -15,22 +16,27 @@ const (
 	APPLICATION_COMMAND_AUTOCOMPLETE
 )
 
+// Snowflake is a Discord snowflake ID
 type Snowflake uint64
 
+// SnowflakeFromString returns a Snowflake from a string
 func SnowflakeFromString(s string) Snowflake {
 	i, _ := strconv.ParseUint(s, 10, 64)
 	return Snowflake(i)
 }
 
+// String implements fmt.Stringer
 func (s Snowflake) String() string {
 	return strconv.FormatUint(uint64(s), 10)
 }
 
+// MarshalJSON implements json.Marshaler
 func (s Snowflake) MarshalJSON() ([]byte, error) {
 	b := strconv.FormatUint(uint64(s), 10)
 	return json.Marshal(b)
 }
 
+// UnmarshalJSON implements json.Unmarshaler
 func (s *Snowflake) UnmarshalJSON(b []byte) error {
 	str, err := strconv.Unquote(string(b))
 	if err != nil {
@@ -46,6 +52,7 @@ func (s *Snowflake) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// User is a Discord User
 type User struct {
 	Avatar        string    `json:"avatar"`
 	Discriminator string    `json:"discriminator"`
@@ -54,6 +61,7 @@ type User struct {
 	Username      string    `json:"username"`
 }
 
+// Interaction is a Discord Interaction
 type Interaction struct {
 	Data          InteractionData `json:"data"`
 	GuildID       Snowflake       `json:"guild_id"`
@@ -68,6 +76,7 @@ type Interaction struct {
 	Version       int             `json:"version"`
 }
 
+// Message is a Discord Message
 type Message struct {
 	Type            int          `json:"type"`
 	Tts             bool         `json:"tts"`
@@ -85,6 +94,7 @@ type Message struct {
 	Attachments     []Attachment `json:"attachments"`
 }
 
+// MessageAuthor is a Discord MessageAuthor
 type MessageAuthor struct {
 	Username      string `json:"username"`
 	PublicFlags   int    `json:"public_flags"`
@@ -93,6 +103,7 @@ type MessageAuthor struct {
 	Avatar        string `json:"avatar"`
 }
 
+// InteractionData is data from a Discord Interaction
 type InteractionData struct {
 	ID            Snowflake           `json:"id"`
 	Name          string              `json:"name"`
@@ -105,8 +116,10 @@ type InteractionData struct {
 	TagetID       Snowflake           `json:"target_id"`
 }
 
+// OptionsInteractions is the options for an Interaction
 type OptionsInteractions map[string]any
 
+// UnmarshalJSON implements json.Unmarshaler
 func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	type opt struct {
 		Name    string     `json:"name"`
@@ -136,6 +149,7 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// MarshalJSON implements json.Marshaler
 func (o OptionsInteractions) MarshalJSON() ([]byte, error) {
 	type opt struct {
 		Name  string `json:"name"`
@@ -154,6 +168,7 @@ func (o OptionsInteractions) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+// Member is a Discord Member
 type Member struct {
 	User         User       `json:"user"`
 	Roles        []string   `json:"roles"`

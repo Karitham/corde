@@ -27,6 +27,7 @@ const (
 	COMMAND_MESSAGE
 )
 
+// Command is a Discord application command
 type Command struct {
 	Name              string      `json:"name,omitempty"`
 	ID                Snowflake   `json:"id,omitempty"`
@@ -39,6 +40,7 @@ type Command struct {
 	Version           Snowflake   `json:"version,omitempty"`
 }
 
+// Option is an option for an application Command
 type Option struct {
 	Name        string        `json:"name"`
 	Type        OptionType    `json:"type"`
@@ -50,21 +52,25 @@ type Option struct {
 	Focused     bool          `json:"focused,omitempty"`
 }
 
+// Choice is an application Command choice
 type Choice[T any] struct {
 	Name  string `json:"name"`
 	Value T      `json:"value"`
 }
 
+// CommandsOpt is an option for a Command
 type CommandsOpt struct {
 	guildID Snowflake
 }
 
+// GuildOpt is an option for setting the guild of a Command
 func GuildOpt(guildID Snowflake) func(*CommandsOpt) {
 	return func(opt *CommandsOpt) {
 		opt.guildID = guildID
 	}
 }
 
+// GetCommands returns a slice of Command from the Mux
 func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]Command, error) {
 	opt := &CommandsOpt{}
 	for _, option := range options {
@@ -86,6 +92,7 @@ func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]Command, error) {
 	return commands, nil
 }
 
+// RegisterCommand registers a new Command to the Mux
 func (m *Mux) RegisterCommand(c Command, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {
@@ -105,6 +112,7 @@ func (m *Mux) RegisterCommand(c Command, options ...func(*CommandsOpt)) error {
 	return rest.CodeBetween(resp, 200, 299)
 }
 
+// BulkRegisterCommand registers a slice of Command to the Mux
 func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {
@@ -124,6 +132,7 @@ func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*CommandsOpt)) er
 	return rest.CodeBetween(resp, 200, 299)
 }
 
+// DeleteCommand deletes a Command from the Mux
 func (m *Mux) DeleteCommand(ID Snowflake, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {

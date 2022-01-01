@@ -55,5 +55,5 @@ func main() {
 		p.Declarations(f)
 	}
 
-	os.WriteFile(*file, []byte(p.String()), 0644)
+	os.WriteFile(*file, []byte(p.String()), 0o644)
 }

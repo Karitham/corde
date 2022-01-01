@@ -1,13 +1,14 @@
 package corde
 
+// ButtonStyle is the style of a button Component
 type ButtonStyle int
 
 const (
-	BUTTON_PRIMARY ButtonStyle = iota + 1
-	BUTTON_SECONDARY
-	BUTTON_SUCCESS
-	BUTTON_DANGER
-	BUTTON_LINK
+	BUTTON_PRIMARY   ButtonStyle = iota + 1 // BUTTON_PRIMARY blurple
+	BUTTON_SECONDARY                        // BUTTON_SECONDARY grey
+	BUTTON_SUCCESS                          // BUTTON_SUCCESS green
+	BUTTON_DANGER                           // BUTTON_DANGER red
+	BUTTON_LINK                             // BUTTON_LINK grey, navigate to URL
 )
 
 // ComponentType
@@ -59,6 +60,8 @@ type Button struct {
 	Disabled bool          `json:"disabled,omitempty"`
 }
 
+// Emoji
+// https://discord.com/developers/docs/resources/emoji#emoji-object
 type Emoji struct {
 	ID   Snowflake `json:"id"`
 	Name string    `json:"name"`
