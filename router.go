@@ -2,8 +2,11 @@ package corde
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"path"
+	"strings"
 	"sync"
 	"time"
 
@@ -71,6 +74,27 @@ func (m *Mux) Command(route string, handler Handler) {
 	m.rMu.Lock()
 	defer m.rMu.Unlock()
 	m.routes.command.Insert(route, &handler)
+}
+
+// Route routes common parts along a pattern
+func (m *Mux) Route(pattern string, fn func(m *Mux)) {
+	if fn == nil {
+		panic(fmt.Sprintf("corde: attempting to Route() a nil subrouter on %q", pattern))
+	}
+
+	r := NewMux(m.PublicKey, m.AppID, m.BotToken)
+	fn(r)
+
+	pattern = strings.TrimLeft(pattern, "/")
+	for route, handler := range r.routes.command.ToMap() {
+		m.routes.command.Insert(path.Join(pattern, route), handler)
+	}
+	for route, handler := range r.routes.autocomplete.ToMap() {
+		m.routes.autocomplete.Insert(path.Join(pattern, route), handler)
+	}
+	for route, handler := range r.routes.component.ToMap() {
+		m.routes.component.Insert(path.Join(pattern, route), handler)
+	}
 }
 
 // NewMux returns a new mux for routing slash commands
