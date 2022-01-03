@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/matryer/is"
 )
 
 const testID = "1234567890"
@@ -52,21 +54,18 @@ func TestFormat(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
+			assert := is.New(t)
 			out := tc.Fmt(testID)
-			if out != tc.Expected {
-				t.Logf("Incorrect Format\nExpected: %s\n     Got: %s\n", tc.Expected, out)
-				t.Fail()
-			}
+			assert.Equal(out, tc.Expected) // Formatted should match expected
 		})
 	}
 }
 
 func TestTimestamp(t *testing.T) {
+	assert := is.New(t)
+
 	now := time.Now()
 	expected := fmt.Sprintf("<t:%d:f>", now.Unix())
 	got := Timestamp(now)
-	if got != expected {
-		t.Logf("Expected: %s\n     Got: %s\n", expected, got)
-		t.Fail()
-	}
+	assert.Equal(got, expected) // Formatted should match expected
 }
