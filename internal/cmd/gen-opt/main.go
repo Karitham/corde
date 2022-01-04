@@ -12,16 +12,20 @@ import (
 var types = []string{
 	"string",
 	"int",
+	"int32",
 	"int64",
 	"uint",
+	"uint32",
 	"uint64",
 	"float32",
 	"float64",
 	"bool",
 	"Snowflake",
+	"any",
 }
 
-var body string = `	v, _ := o[k].(%s)
+var body string = `	var v %s
+	_ = o[k].UnmarshalTo(&v)
 	return v
 `
 

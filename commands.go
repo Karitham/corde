@@ -44,7 +44,7 @@ type Command struct {
 type Option struct {
 	Name        string        `json:"name"`
 	Type        OptionType    `json:"type"`
-	Value       any           `json:"value"`
+	Value       JsonRaw       `json:"value"`
 	Description string        `json:"description,omitempty"`
 	Required    bool          `json:"required,omitempty"`
 	Options     []Option      `json:"options,omitempty"`

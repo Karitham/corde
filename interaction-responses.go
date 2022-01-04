@@ -2,6 +2,7 @@ package corde
 
 import (
 	"io"
+	"strings"
 	"time"
 )
 
@@ -68,7 +69,23 @@ type Embed struct {
 type Timestamp time.Time
 
 func (t Timestamp) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + time.Time(t).UTC().Format("2006-01-02T15:04:05-0700") + `"`), nil
+	return []byte(`"` + time.Time(t).UTC().Format(time.RFC3339) + `"`), nil
+}
+
+func (t *Timestamp) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+
+	if s == "null" || s == "" {
+		return nil
+	}
+
+	v, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		return err
+	}
+
+	*t = Timestamp(v)
+	return nil
 }
 
 func (t Timestamp) String() string {

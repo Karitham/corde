@@ -128,13 +128,13 @@ type InteractionData struct {
 }
 
 // OptionsInteractions is the options for an Interaction
-type OptionsInteractions map[string]any
+type OptionsInteractions map[string]JsonRaw
 
 // UnmarshalJSON implements json.Unmarshaler
 func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	type opt struct {
 		Name    string     `json:"name"`
-		Value   any        `json:"value"`
+		Value   JsonRaw    `json:"value"`
 		Type    OptionType `json:"type"`
 		Options []opt      `json:"options"`
 	}
@@ -145,7 +145,7 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	}
 
 	// max is 3 deep, as per discord's docs
-	m := make(map[string]any)
+	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
