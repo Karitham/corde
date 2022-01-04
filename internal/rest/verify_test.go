@@ -1,4 +1,4 @@
-package corde
+package rest
 
 import (
 	"crypto/ed25519"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func TestValidate(t *testing.T) {
+func TestVerify(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(nil)
 	if err != nil {
 		t.Log(err)
@@ -54,7 +54,7 @@ func TestValidate(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(Validate(hex.EncodeToString(pub))(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	s := httptest.NewServer(Verify(hex.EncodeToString(pub))(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write(nil)
 	})))
 	defer s.Close()
