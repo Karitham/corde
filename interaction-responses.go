@@ -1,6 +1,9 @@
 package corde
 
-import "io"
+import (
+	"io"
+	"time"
+)
 
 // InteractionRespData is the payload for responding to an interaction
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
@@ -44,23 +47,40 @@ type Attachment struct {
 }
 
 // Embed is the embed object
+// https://discord.com/developers/docs/resources/channel#embed-object
 type Embed struct {
-	Author      Author  `json:"author"`
-	Footer      Footer  `json:"footer"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Thumbnail   Image   `json:"thumbnail"`
-	Image       Image   `json:"image"`
-	URL         string  `json:"url"`
-	Fields      []Field `json:"fields"`
-	Color       int64   `json:"color"`
+	Title       string    `json:"title,omitempty"`
+	Description string    `json:"description,omitempty"`
+	URL         string    `json:"url,omitempty"`
+	Timestamp   Timestamp `json:"timestamp,omitempty"`
+	Color       uint32    `json:"color,omitempty"`
+	Footer      Footer    `json:"footer,omitempty"`
+	Image       Image     `json:"image,omitempty"`
+	Thumbnail   Image     `json:"thumbnail,omitempty"`
+	Video       Video     `json:"video,omitempty"`
+	Provider    Provider  `json:"provider,omitempty"`
+	Author      Author    `json:"author,omitempty"`
+	Fields      []Field   `json:"fields,omitempty"`
+}
+
+// Timestamp is a discord timestamp
+// It is represented as a string in the ISO 8601 format
+type Timestamp time.Time
+
+func (t Timestamp) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + time.Time(t).UTC().Format("2006-01-02T15:04:05-0700") + `"`), nil
+}
+
+func (t Timestamp) String() string {
+	return time.Time(t).UTC().Format("2006-01-02T15:04:05-0700")
 }
 
 // Author is the author object
 type Author struct {
-	Name    string `json:"name"`
-	URL     string `json:"url"`
-	IconURL string `json:"icon_url"`
+	Name         string `json:"name"`
+	URL          string `json:"url,omitempty"`
+	IconURL      string `json:"icon_url,omitempty"`
+	ProxyIconURL string `json:"proxy_icon_url,omitempty"`
 }
 
 // Field is the field object inside an embed
@@ -72,15 +92,33 @@ type Field struct {
 
 // Footer is the footer of the embed
 type Footer struct {
-	Text    string `json:"text"`
-	IconURL string `json:"icon_url"`
+	Text         string `json:"text"`
+	IconURL      string `json:"icon_url,omitempty"`
+	ProxyIconURL string `json:"proxy_icon_url,omitempty"`
 }
 
 // Image is an image possibly contained inside the embed
 type Image struct {
-	URL string `json:"url"`
+	URL      string `json:"url,omitempty"`
+	ProxyURL string `json:"proxy_url,omitempty"`
+	Height   int    `json:"height,omitempty"`
+	Width    int    `json:"width,omitempty"`
 }
 
 type MessageReference struct {
 	MessageID string `json:"message_id"`
+}
+
+// Video is an embed video
+type Video struct {
+	URL      string `json:"url,omitempty"`
+	ProxyURL string `json:"proxy_url,omitempty"`
+	Height   int    `json:"height,omitempty"`
+	Width    int    `json:"width,omitempty"`
+}
+
+// Provider is an embed provider
+type Provider struct {
+	Name string `json:"name,omitempty"`
+	URL  string `json:"url,omitempty"`
 }
