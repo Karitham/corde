@@ -12,6 +12,7 @@ type CreateOptioner interface {
 	createOption() CreateOption
 }
 
+// CreateOption is the base option type for creating any sort of option
 type CreateOption struct {
 	Name        string           `json:"name"`
 	Type        OptionType       `json:"type"`
@@ -19,6 +20,10 @@ type CreateOption struct {
 	Required    bool             `json:"required,omitempty"`
 	Options     []CreateOptioner `json:"options,omitempty"`
 	Choices     []Choice[any]    `json:"choices,omitempty"`
+}
+
+func (c CreateOption) createOption() CreateOption {
+	return c
 }
 
 // CreateCommand is a slash command that can be registered to discord
