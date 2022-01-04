@@ -8,11 +8,7 @@ import (
 	"github.com/Karitham/corde"
 )
 
-var command = corde.Command{
-	Name:        "bongo",
-	Description: "send a big bongo",
-	Type:        corde.COMMAND_CHAT_INPUT,
-}
+var command = corde.NewSlashCommand("bongo", "send a big bongo")
 
 func main() {
 	token := os.Getenv("DISCORD_BOT_TOKEN")
@@ -36,23 +32,18 @@ func main() {
 		log.Fatalln("error registering command: ", err)
 	}
 
+	log.Println("serving on :8070")
 	if err := m.ListenAndServe(":8070"); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func bongoHandler(w corde.ResponseWriter, i *corde.Interaction) {
+func bongoHandler(w corde.ResponseWriter, _ *corde.Interaction) {
 	resp, err := http.Get("https://cdn.discordapp.com/emojis/745709799890747434.gif?size=128")
 	if err != nil {
 		w.Respond(corde.NewResp().Content("couldn't retrieve bongo").Ephemeral().B())
 		return
 	}
 	defer resp.Body.Close()
-	w.Respond(corde.NewResp().
-		Attachments(corde.Attachment{
-			Body:     resp.Body,
-			ID:       corde.Snowflake(0),
-			Filename: "bongo.gif",
-		}).B(),
-	)
+	w.Respond(corde.NewResp().Attachment(resp.Body, "bongo.gif").B())
 }

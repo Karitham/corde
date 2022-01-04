@@ -8,18 +8,11 @@ import (
 	"github.com/Karitham/corde"
 )
 
-var command = corde.Command{
-	Name:        "cmd",
-	Description: "edit and view existing slash commands",
-	Type:        corde.COMMAND_CHAT_INPUT,
-	Options: []corde.Option{
-		{
-			Name:        "list",
-			Type:        corde.OPTION_SUB_COMMAND,
-			Description: "list existing slash commands",
-		},
-	},
-}
+var command = corde.NewSlashCommand(
+	"cmd",
+	"edit and view existing slash commands",
+	corde.NewSubcommand("list", "list existing slash commands", false),
+)
 
 func main() {
 	token := os.Getenv("DISCORD_BOT_TOKEN")
@@ -53,6 +46,7 @@ func main() {
 		log.Fatalln("error registering command: ", err)
 	}
 
+	log.Println("serving on :8070")
 	if err := m.ListenAndServe(":8070"); err != nil {
 		log.Fatalln(err)
 	}
@@ -75,7 +69,7 @@ var delBtn = corde.Component{
 }
 
 func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Interaction) {
-	return func(w corde.ResponseWriter, i *corde.Interaction) {
+	return func(w corde.ResponseWriter, _ *corde.Interaction) {
 		w.Respond(corde.NewResp().
 			ActionRow(nextBtn).
 			Ephemeral().
@@ -86,10 +80,14 @@ func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *
 }
 
 func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Interaction) {
-	return func(w corde.ResponseWriter, i *corde.Interaction) {
+	return func(w corde.ResponseWriter, _ *corde.Interaction) {
 		mu.Lock()
 		defer mu.Unlock()
-		commands, _ := m.GetCommands(g)
+		commands, err := m.GetCommands(g)
+		if err != nil {
+			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral().B())
+			return
+		}
 		if len(commands) == 0 {
 			w.Update(corde.NewResp().Content("No commands found.").Ephemeral().B())
 			return
@@ -107,10 +105,14 @@ func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedI
 }
 
 func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Interaction) {
-	return func(w corde.ResponseWriter, i *corde.Interaction) {
+	return func(w corde.ResponseWriter, _ *corde.Interaction) {
 		mu.Lock()
 		defer mu.Unlock()
-		commands, _ := m.GetCommands(g)
+		commands, err := m.GetCommands(g)
+		if err != nil {
+			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral().B())
+			return
+		}
 		c := commands[*selectedID]
 
 		m.DeleteCommand(c.ID, g)

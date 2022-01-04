@@ -54,7 +54,7 @@ func TestValidate(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(Validate(hex.EncodeToString(pub))(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	s := httptest.NewServer(Validate(hex.EncodeToString(pub))(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write(nil)
 	})))
 	defer s.Close()

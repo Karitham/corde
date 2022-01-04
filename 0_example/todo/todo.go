@@ -24,7 +24,7 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	w.Respond(corde.NewResp().Contentf("Sucessfully added %s", name).Ephemeral().B())
 }
 
-func (t *todo) listHandler(w corde.ResponseWriter, i *corde.Interaction) {
+func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Interaction) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -38,12 +38,11 @@ func (t *todo) listHandler(w corde.ResponseWriter, i *corde.Interaction) {
 			Title("Todo list").
 			// build todo list description
 			Description(func() string {
-				s := &strings.Builder{}
+				s, i := &strings.Builder{}, 1
 				s.WriteString("```todo\n")
-				i := 0
 				for k, v := range t.list {
-					i++
 					s.WriteString(fmt.Sprintf("%d. %s: %s\n", i, k, v))
+					i++
 				}
 				s.WriteString("```")
 				return s.String()
