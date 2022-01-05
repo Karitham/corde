@@ -58,7 +58,7 @@ Corde is also actively used to rewrite and develop another discord bot of mine c
 
 Having used most go discord libs available, I wanted something very lightweight yet high-level, that could just run on a lambda without state, caching or long start-up times.
 
-Corde has a single dependency as of yet, and it's just a codegen utility.
+Corde has a single dependency as of yet, a radix tree for routing purposes.
 
 The common libs out there didn't really fit that purpose, and neither did they implement the webhook callback API available.
 
