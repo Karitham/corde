@@ -6,20 +6,35 @@ import (
 	"sync"
 
 	"github.com/Karitham/corde"
+	"github.com/Karitham/corde/format"
 )
 
 type todo struct {
 	mu   sync.Mutex
-	list map[string]string
+	list map[string]todoItem
+}
+
+type todoItem struct {
+	user  corde.Snowflake
+	value string
 }
 
 func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	value := i.Data.Options.String("value")
 	name := i.Data.Options.String("name")
 
+	user := i.Data.Options.Snowflake("user")
+	if user == 0 {
+		user = i.User.ID
+	}
+
 	t.mu.Lock()
 	defer t.mu.Unlock()
-	t.list[name] = value
+
+	t.list[name] = todoItem{
+		user:  user,
+		value: value,
+	}
 
 	w.Respond(corde.NewResp().Contentf("Sucessfully added %s", name).Ephemeral().B())
 }
@@ -39,12 +54,10 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Interaction) {
 			// build todo list description
 			Description(func() string {
 				s, i := &strings.Builder{}, 1
-				s.WriteString("```todo\n")
 				for k, v := range t.list {
-					s.WriteString(fmt.Sprintf("%d. %s: %s\n", i, k, v))
+					s.WriteString(fmt.Sprintf("%d. %s: %s - %s\n", i, k, v.value, format.User(v.user.String())))
 					i++
 				}
-				s.WriteString("```")
 				return s.String()
 			}()).
 			Color(0x69b00b).

@@ -39,13 +39,17 @@ Be aware that breaking changes will happen as of now, at least until v1.
 go get github.com/Karitham/corde
 ```
 
+### Usage
+
+The easiest way to run the examples, or even to run your own is to use [ngrok](https://ngrok.com/) no login or domain required, and the product itself is great.
+
 ## Examples
 
-The most basic one is [**bongo**](_example/bongo/main.go)
+The most basic one is [**bongo**](0_example/bongo/main.go)
 
-Then comes [**todo**](_example/todo/) that shows off subcommands routing and options
+Then comes [**todo**](0_example/todo/) that shows off subcommands routing and options
 
-And then we have [**moderate-myself**](_example/moderate-myself/main.go) which is able to show and delete currently available commands.
+And then we have [**moderate-myself**](0_example/moderate-myself/main.go) which is able to show and delete currently available commands.
 It demonstrates the usage of components such as buttons.
 
 Corde is also actively used to rewrite and develop another discord bot of mine called [**WaifuBot**](https://github.com/Karitham/WaifuBot/) (for now see the corde branch)

@@ -11,7 +11,7 @@ import (
 var command = corde.NewSlashCommand(
 	"cmd",
 	"edit and view existing slash commands",
-	corde.NewSubcommand("list", "list existing slash commands", false),
+	corde.NewSubcommand("list", "list existing slash commands"),
 )
 
 func main() {

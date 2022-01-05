@@ -8,26 +8,17 @@ import (
 	"github.com/Karitham/corde"
 )
 
-var commands = []corde.CreateCommander{
-	corde.NewSlashCommand(
-		"todo",
-		"view edit and remove todos",
-		corde.NewSubcommand(
-			"list",
-			"list todos",
-			false,
-			corde.NewStringOption("name", "todo name", true),
-			corde.NewStringOption("value", "todo value", true),
-		),
-		corde.NewSubcommand("add", "add a todo", false),
-		corde.NewSubcommand(
-			"rm",
-			"remove a todo",
-			false,
-			corde.NewStringOption("name", "todo name", true),
-		),
+var commands = corde.NewSlashCommand("todo", "view edit and remove todos",
+	corde.NewSubcommand("list", "list todos"),
+	corde.NewSubcommand("add", "add a todo",
+		corde.NewStringOption("name", "todo name", true),
+		corde.NewStringOption("value", "todo value", true),
+		corde.NewUserOption("user", "assign it to a user", false),
 	),
-}
+	corde.NewSubcommand("rm", "remove a todo",
+		corde.NewStringOption("name", "todo name", true),
+	),
+)
 
 func main() {
 	token := os.Getenv("DISCORD_BOT_TOKEN")
@@ -45,7 +36,7 @@ func main() {
 
 	t := todo{
 		mu:   sync.Mutex{},
-		list: make(map[string]string),
+		list: make(map[string]todoItem),
 	}
 
 	m := corde.NewMux(pk, appID, token)
@@ -56,7 +47,7 @@ func main() {
 	})
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
-	if err := m.BulkRegisterCommand(commands, g); err != nil {
+	if err := m.RegisterCommand(commands, g); err != nil {
 		log.Fatalln(err)
 	}
 
