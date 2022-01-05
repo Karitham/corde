@@ -210,10 +210,10 @@ type Member struct {
 	Avatar                     Hash        `json:"avatar,omitempty"`
 	Joined                     Timestamp   `json:"joined_at"`
 	BoostedSince               Timestamp   `json:"premium_since,omitempty"`
-	CommunicationDisabledUntil Timestamp   `json:"communication_disabled_until"`
-	Deaf                       bool        `json:"deaf"`
-	Mute                       bool        `json:"mute"`
-	IsPending                  bool        `json:"pending"`
+	CommunicationDisabledUntil Timestamp   `json:"communication_disabled_until,omitempty"`
+	Deaf                       bool        `json:"deaf,omitempty"`
+	Mute                       bool        `json:"mute,omitempty"`
+	IsPending                  bool        `json:"pending,omitempty"`
 }
 
 // User is a Discord User
