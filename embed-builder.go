@@ -18,7 +18,6 @@ func NewEmbed() *EmbedB {
 			Title:       "",
 			Description: "",
 			URL:         "",
-			Timestamp:   Timestamp{},
 			Color:       0,
 			Footer:      Footer{},
 			Image:       Image{},
@@ -138,7 +137,7 @@ func (b *EmbedB) Video(v Video) *EmbedB {
 
 // Timestamp adds the timestamp to the Embed
 func (b *EmbedB) Timestamp(t time.Time) *EmbedB {
-	b.Embed.Timestamp = Timestamp(t)
+	b.Embed.Timestamp = opt(Timestamp(t))
 	return b
 }
 
@@ -146,4 +145,8 @@ func (b *EmbedB) Timestamp(t time.Time) *EmbedB {
 func (b *EmbedB) Color(i uint32) *EmbedB {
 	b.Embed.Color = i
 	return b
+}
+
+func opt[T any](v T) *T {
+	return &v
 }

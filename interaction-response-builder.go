@@ -1,6 +1,9 @@
 package corde
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 // RespB is an InteractionRespData builder
 // https://regex101.com/r/tKfloG/2
@@ -88,5 +91,14 @@ func (b *RespB) ActionRow(c ...Component) *RespB {
 // Attachments adds attachments to the InteractionRespData
 func (b *RespB) Attachments(a ...Attachment) *RespB {
 	b.InteractionRespData.Attachments = append(b.InteractionRespData.Attachments, a...)
+	return b
+}
+
+// Attachement adds an attachment to the InteractionRespData
+func (b *RespB) Attachment(body io.Reader, filename string) *RespB {
+	b.InteractionRespData.Attachments = append(b.InteractionRespData.Attachments, Attachment{
+		Body:     body,
+		Filename: filename,
+	})
 	return b
 }

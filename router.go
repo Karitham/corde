@@ -172,6 +172,7 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 	switch i.Type {
 	case PING:
 		r.pong()
+		return
 	case MESSAGE_COMPONENT:
 		if _, h, ok := m.routes.component.LongestPrefix(i.Data.CustomID); ok {
 			(*h)(r, i)
@@ -191,8 +192,10 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 			}
 		}
 	case APPLICATION_COMMAND_AUTOCOMPLETE:
-		log.Println("unimplemented autocomplete")
-		r.Respond(NewResp().Ephemeral().Content("unimplemented autocomplete").B())
+		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
+			(*h)(r, i)
+			return
+		}
 	}
 	m.OnNotFound(r, i)
 }

@@ -50,18 +50,18 @@ type Attachment struct {
 // Embed is the embed object
 // https://discord.com/developers/docs/resources/channel#embed-object
 type Embed struct {
-	Title       string    `json:"title,omitempty"`
-	Description string    `json:"description,omitempty"`
-	URL         string    `json:"url,omitempty"`
-	Timestamp   Timestamp `json:"timestamp,omitempty"`
-	Color       uint32    `json:"color,omitempty"`
-	Footer      Footer    `json:"footer,omitempty"`
-	Image       Image     `json:"image,omitempty"`
-	Thumbnail   Image     `json:"thumbnail,omitempty"`
-	Video       Video     `json:"video,omitempty"`
-	Provider    Provider  `json:"provider,omitempty"`
-	Author      Author    `json:"author,omitempty"`
-	Fields      []Field   `json:"fields,omitempty"`
+	Title       string     `json:"title,omitempty"`
+	Description string     `json:"description,omitempty"`
+	URL         string     `json:"url,omitempty"`
+	Timestamp   *Timestamp `json:"timestamp,omitempty"`
+	Color       uint32     `json:"color,omitempty"`
+	Footer      Footer     `json:"footer,omitempty"`
+	Image       Image      `json:"image,omitempty"`
+	Thumbnail   Image      `json:"thumbnail,omitempty"`
+	Video       Video      `json:"video,omitempty"`
+	Provider    Provider   `json:"provider,omitempty"`
+	Author      Author     `json:"author,omitempty"`
+	Fields      []Field    `json:"fields,omitempty"`
 }
 
 // Timestamp is a discord timestamp

@@ -92,8 +92,8 @@ func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]Command, error) {
 	return commands, nil
 }
 
-// RegisterCommand registers a new Command to the Mux
-func (m *Mux) RegisterCommand(c Command, options ...func(*CommandsOpt)) error {
+// RegisterCommand registers a new Command on discord
+func (m *Mux) RegisterCommand(c CreateCommander, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
@@ -112,8 +112,8 @@ func (m *Mux) RegisterCommand(c Command, options ...func(*CommandsOpt)) error {
 	return rest.CodeBetween(resp, 200, 299)
 }
 
-// BulkRegisterCommand registers a slice of Command to the Mux
-func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*CommandsOpt)) error {
+// BulkRegisterCommand registers a slice of Command on discord
+func (m *Mux) BulkRegisterCommand(c []CreateCommander, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
@@ -132,7 +132,7 @@ func (m *Mux) BulkRegisterCommand(c []Command, options ...func(*CommandsOpt)) er
 	return rest.CodeBetween(resp, 200, 299)
 }
 
-// DeleteCommand deletes a Command from the Mux
+// DeleteCommand deletes a Command from discord
 func (m *Mux) DeleteCommand(ID Snowflake, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {
