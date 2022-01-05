@@ -1,6 +1,9 @@
 package corde
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // EmbedB is an Embed builder
 // https://regex101.com/r/gmVH2A/4
@@ -12,15 +15,18 @@ type EmbedB struct {
 func NewEmbed() *EmbedB {
 	return &EmbedB{
 		Embed: Embed{
-			Author:      Author{},
-			Footer:      Footer{},
 			Title:       "",
 			Description: "",
-			Thumbnail:   Image{},
-			Image:       Image{},
 			URL:         "",
-			Fields:      []Field{},
+			Timestamp:   Timestamp{},
 			Color:       0,
+			Footer:      Footer{},
+			Image:       Image{},
+			Thumbnail:   Image{},
+			Video:       Video{},
+			Provider:    Provider{},
+			Author:      Author{},
+			Fields:      []Field{},
 		},
 	}
 }
@@ -76,19 +82,68 @@ func (b *EmbedB) Image(i Image) *EmbedB {
 	return b
 }
 
+// ImageURL adds an image based off the url to the Embed
+func (b *EmbedB) ImageURL(s string) *EmbedB {
+	b.Embed.Image = Image{
+		URL: s,
+	}
+	return b
+}
+
 // URL adds the url to the Embed
 func (b *EmbedB) URL(s string) *EmbedB {
 	b.Embed.URL = s
 	return b
 }
 
+// Fields append the field to the Embed
 func (b *EmbedB) Fields(f ...Field) *EmbedB {
 	b.Embed.Fields = append(b.Embed.Fields, f...)
 	return b
 }
 
+// Field adds a field to the Embed
+func (b *EmbedB) Field(name, value string) *EmbedB {
+	b.Embed.Fields = append(b.Embed.Fields, Field{
+		Name:  name,
+		Value: value,
+	})
+	return b
+}
+
+// FieldInline adds an inline field to the Embed
+func (b *EmbedB) FieldInline(name, value string) *EmbedB {
+	b.Embed.Fields = append(b.Embed.Fields, Field{
+		Name:   name,
+		Value:  value,
+		Inline: true,
+	})
+	return b
+}
+
+// Provider adds a provider to the Embed
+func (b *EmbedB) Provider(name string, url string) *EmbedB {
+	b.Embed.Provider = Provider{
+		Name: name,
+		URL:  url,
+	}
+	return b
+}
+
+// Video adds the video to the Embed
+func (b *EmbedB) Video(v Video) *EmbedB {
+	b.Embed.Video = v
+	return b
+}
+
+// Timestamp adds the timestamp to the Embed
+func (b *EmbedB) Timestamp(t time.Time) *EmbedB {
+	b.Embed.Timestamp = Timestamp(t)
+	return b
+}
+
 // Color adds the color to the Embed
-func (b *EmbedB) Color(i int64) *EmbedB {
+func (b *EmbedB) Color(i uint32) *EmbedB {
 	b.Embed.Color = i
 	return b
 }

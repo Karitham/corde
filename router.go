@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Karitham/corde/internal/rest"
 	radix "github.com/akrennmair/go-radix"
 )
 
@@ -139,7 +140,7 @@ type ResponseWriter interface {
 
 // ListenAndServe starts the gateway listening to events
 func (m *Mux) ListenAndServe(addr string) error {
-	validator := Validate(m.PublicKey)
+	validator := rest.Verify(m.PublicKey)
 	r := http.NewServeMux()
 	r.Handle(m.BasePath, validator(http.HandlerFunc(m.route)))
 

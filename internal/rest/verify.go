@@ -1,4 +1,4 @@
-package corde
+package rest
 
 import (
 	"bytes"
@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// Validate is a middleware to validate Interaction payloads
-func Validate(publicKey string) func(http.Handler) http.Handler {
+// Verify is a middleware to verify Interaction payloads
+func Verify(publicKey string) func(http.Handler) http.Handler {
 	pk, err := hex.DecodeString(publicKey)
 	if err != nil {
 		panic("invalid public key")

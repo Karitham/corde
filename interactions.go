@@ -2,7 +2,9 @@ package corde
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -52,15 +54,6 @@ func (s *Snowflake) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// User is a Discord User
-type User struct {
-	Avatar        string    `json:"avatar"`
-	Discriminator string    `json:"discriminator"`
-	ID            Snowflake `json:"id"`
-	PublicFlags   int       `json:"public_flags"`
-	Username      string    `json:"username"`
-}
-
 // Interaction is a Discord Interaction
 type Interaction struct {
 	Data          InteractionData `json:"data"`
@@ -103,12 +96,30 @@ type MessageAuthor struct {
 	Avatar        string `json:"avatar"`
 }
 
+// Role is a user's role
+// https://discord.com/developers/docs/topics/permissions#role-object
+type Role struct {
+	ID          Snowflake `json:"id"`
+	Name        string    `json:"name"`
+	Permissions uint64    `json:"permissions,string"`
+	Position    int       `json:"position"`
+	Color       uint32    `json:"color"`
+	Hoist       bool      `json:"hoist"`
+	Managed     bool      `json:"managed"`
+	Mentionable bool      `json:"mentionable"`
+}
+
 // InteractionData is data from a Discord Interaction
 type InteractionData struct {
-	ID            Snowflake           `json:"id"`
-	Name          string              `json:"name"`
-	Type          int                 `json:"type"`
-	Resolved      any                 `json:"resolved"` // ?
+	ID       Snowflake `json:"id"`
+	Name     string    `json:"name"`
+	Type     int       `json:"type"`
+	Resolved struct {
+		Users    map[Snowflake]User    `json:"users,omitempty"`
+		Members  map[Snowflake]Member  `json:"members,omitempty"`
+		Roles    map[Snowflake]Role    `json:"roles,omitempty"`
+		Messages map[Snowflake]Message `json:"messages,omitempty"`
+	}
 	Options       OptionsInteractions `json:"options"`
 	CustomID      string              `json:"custom_id"`
 	ComponentType ComponentType       `json:"component_type"`
@@ -117,13 +128,13 @@ type InteractionData struct {
 }
 
 // OptionsInteractions is the options for an Interaction
-type OptionsInteractions map[string]any
+type OptionsInteractions map[string]JsonRaw
 
 // UnmarshalJSON implements json.Unmarshaler
 func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	type opt struct {
 		Name    string     `json:"name"`
-		Value   any        `json:"value"`
+		Value   JsonRaw    `json:"value"`
 		Type    OptionType `json:"type"`
 		Options []opt      `json:"options"`
 	}
@@ -134,7 +145,7 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	}
 
 	// max is 3 deep, as per discord's docs
-	m := make(map[string]any)
+	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
@@ -168,16 +179,57 @@ func (o OptionsInteractions) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+// Hash is a discord profile picture hash
+// https://discord.com/developers/docs/reference#image-formatting
+type Hash string
+
+// Animated returns wether the url is an animated gif
+func (h Hash) Animated() bool {
+	return strings.HasPrefix(string(h), "a_")
+}
+
+// AvatarPNG returns a png url of this hash
+func (u User) AvatarPNG() string {
+	return fmt.Sprintf("https://cdn.discordapp.com/avatars/%d/%s.png", u.ID, u.Avatar)
+}
+
+// AvatarURL returns a url of this user, being animated if it can
+func (u User) AvatarURL() string {
+	if u.Avatar.Animated() {
+		return fmt.Sprintf("https://cdn.discordapp.com/avatars/%d/%s.gif", u.ID, u.Avatar)
+	}
+	return u.AvatarPNG()
+}
+
 // Member is a Discord Member
+// https://discord.com/developers/docs/resources/guild#guild-member-object
 type Member struct {
-	User         User       `json:"user"`
-	Roles        []string   `json:"roles"`
-	PremiumSince *Snowflake `json:"premium_since"`
-	Permissions  Snowflake  `json:"permissions"`
-	Pending      bool       `json:"pending"`
-	Nick         *string    `json:"nick"`
-	Mute         bool       `json:"mute"`
-	JoinedAt     time.Time  `json:"joined_at"`
-	IsPending    bool       `json:"is_pending"`
-	Deaf         bool       `json:"deaf"`
+	User                       User        `json:"user"`
+	Nick                       string      `json:"nick,omitempty"`
+	RoleIDs                    []Snowflake `json:"roles"`
+	Avatar                     Hash        `json:"avatar,omitempty"`
+	Joined                     Timestamp   `json:"joined_at"`
+	BoostedSince               Timestamp   `json:"premium_since,omitempty"`
+	CommunicationDisabledUntil Timestamp   `json:"communication_disabled_until"`
+	Deaf                       bool        `json:"deaf"`
+	Mute                       bool        `json:"mute"`
+	IsPending                  bool        `json:"pending"`
+}
+
+// User is a Discord User
+type User struct {
+	ID            Snowflake `json:"id"`
+	Username      string    `json:"username"`
+	Discriminator string    `json:"discriminator"`
+	Avatar        Hash      `json:"avatar,omitempty"`
+	Bot           bool      `json:"bot,omitempty"`
+	System        bool      `json:"system,omitempty"`
+	MFAEnabled    bool      `json:"mfa_enabled,omitempty"`
+	Verified      bool      `json:"verified,omitempty"`
+	Email         string    `json:"email,omitempty"`
+	Flags         int       `json:"flags,omitempty"`
+	Banner        string    `json:"banner,omitempty"`
+	AccentColor   uint32    `json:"accent_color,omitempty"`
+	PremiumType   int       `json:"premium_type,omitempty"`
+	PublicFlags   int       `json:"public_flags,omitempty"`
 }
