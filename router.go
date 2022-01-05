@@ -147,6 +147,12 @@ func (m *Mux) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, r)
 }
 
+// Handler returns an http.Handler for the mux
+func (m *Mux) Handler() http.Handler {
+	validator := rest.Verify(m.PublicKey)
+	return validator(http.HandlerFunc(m.route))
+}
+
 // route handles routing the requests
 func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
 	i := &Interaction{}
