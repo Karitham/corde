@@ -13,17 +13,7 @@ type RespB struct {
 
 // NewResp Returns a new response builder
 func NewResp() *RespB {
-	return &RespB{
-		InteractionRespData: &InteractionRespData{
-			Content:         "",
-			TTS:             false,
-			Embeds:          []Embed{},
-			AllowedMentions: &AllowedMentions{},
-			Flags:           0,
-			Components:      []Component{},
-			Attachments:     []Attachment{},
-		},
-	}
+	return &RespB{InteractionRespData: &InteractionRespData{}}
 }
 
 // EmbedBuilder is an Embed builder
@@ -80,12 +70,20 @@ func (b *RespB) Ephemeral() *RespB {
 
 // Components adds components to the InteractionRespData
 func (b *RespB) Components(c ...Component) *RespB {
+	if b.InteractionRespData.Components == nil {
+		b.InteractionRespData.Components = []Component{}
+	}
+
 	b.InteractionRespData.Components = append(b.InteractionRespData.Components, c...)
 	return b
 }
 
 // ActionRow adds an action row to the InteractionRespData
 func (b *RespB) ActionRow(c ...Component) *RespB {
+	if b.InteractionRespData.Components == nil {
+		b.InteractionRespData.Components = []Component{}
+	}
+
 	b.InteractionRespData.Components = append(b.InteractionRespData.Components,
 		Component{
 			Type:       COMPONENT_ACTION_ROW,
@@ -97,15 +95,47 @@ func (b *RespB) ActionRow(c ...Component) *RespB {
 
 // Attachments adds attachments to the InteractionRespData
 func (b *RespB) Attachments(a ...Attachment) *RespB {
+	if b.InteractionRespData.Attachments == nil {
+		b.InteractionRespData.Attachments = []Attachment{}
+	}
+
 	b.InteractionRespData.Attachments = append(b.InteractionRespData.Attachments, a...)
 	return b
 }
 
 // Attachement adds an attachment to the InteractionRespData
 func (b *RespB) Attachment(body io.Reader, filename string) *RespB {
+	if b.InteractionRespData.Attachments == nil {
+		b.InteractionRespData.Attachments = []Attachment{}
+	}
+
 	b.InteractionRespData.Attachments = append(b.InteractionRespData.Attachments, Attachment{
 		Body:     body,
 		Filename: filename,
 	})
+	return b
+}
+
+// Choice adds a choice to the InteractionRespData
+func (b *RespB) Choice(name string, value any) *RespB {
+	if b.InteractionRespData.Choices == nil {
+		b.InteractionRespData.Choices = []Choice[any]{}
+	}
+
+	b.InteractionRespData.Choices = append(b.InteractionRespData.Choices, Choice[any]{
+		Name:  name,
+		Value: value,
+	})
+
+	return b
+}
+
+// Choices adds choices to the InteractionRespData
+func (b *RespB) Choices(c ...Choice[any]) *RespB {
+	if b.InteractionRespData.Choices == nil {
+		b.InteractionRespData.Choices = []Choice[any]{}
+	}
+
+	b.InteractionRespData.Choices = append(b.InteractionRespData.Choices, c...)
 	return b
 }

@@ -233,3 +233,21 @@ type User struct {
 	PremiumType   int       `json:"premium_type,omitempty"`
 	PublicFlags   int       `json:"public_flags,omitempty"`
 }
+
+// ChannelType is the type of a channel
+// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+type ChannelType int
+
+const (
+	CHANNEL_GUILD_TEXT ChannelType = iota
+	CHANNEL_DM
+	CHANNEL_GUILD_VOICE
+	CHANNEL_GROUP_DM
+	CHANNEL_GUILD_CATEGORY
+	CHANNEL_GUILD_NEWS
+	CHANNEL_GUILD_STORE
+	CHANNEL_GUILD_NEWS_THREAD = iota + 3
+	CHANNEL_GUILD_PUBLIC_THREAD
+	CHANNEL_GUILD_PRIVATE_THREAD
+	CHANNEL_GUILD_STAGE_VOICE
+)

@@ -16,6 +16,7 @@ type InteractionRespData struct {
 	Flags           IntResponseFlags `json:"flags,omitempty"`
 	Components      []Component      `json:"components,omitempty"`
 	Attachments     []Attachment     `json:"attachments,omitempty"`
+	Choices         []Choice[any]    `json:"choices,omitempty"`
 }
 
 type IntResponseFlags uint

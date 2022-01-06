@@ -10,25 +10,28 @@ import (
 )
 
 var types = map[string]opt{
-	"OPTION_STRING":      {"string", "string"},
-	"OPTION_INTEGER":     {"int", "int"},
-	"OPTION_BOOLEAN":     {"bool", "bool"},
-	"OPTION_USER":        {"Snowflake", "user"},
-	"OPTION_CHANNEL":     {"Snowflake", "channel"},
-	"OPTION_ROLE":        {"Snowflake", "role"},
-	"OPTION_MENTIONABLE": {"Snowflake", "mentionable"},
-	"OPTION_NUMBER":      {"float64", "number"},
+	"OPTION_STRING":      {Type: "string", Name: "string", CanAutocomplete: true},
+	"OPTION_INTEGER":     {Type: "int", Name: "int", CanAutocomplete: true},
+	"OPTION_NUMBER":      {Type: "float64", Name: "number", CanAutocomplete: true},
+	"OPTION_BOOLEAN":     {Type: "bool", Name: "bool"},
+	"OPTION_USER":        {Type: "Snowflake", Name: "user"},
+	"OPTION_CHANNEL":     {Type: "Snowflake", Name: "channel"},
+	"OPTION_ROLE":        {Type: "Snowflake", Name: "role"},
+	"OPTION_MENTIONABLE": {Type: "Snowflake", Name: "mentionable"},
 }
 
 type opt struct {
-	Type string
-	Name string
+	Type            string
+	Name            string
+	CanAutocomplete bool
 }
 
 var ConstructorBody string = `	o := &%s{
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -46,6 +49,8 @@ var CreateOptionBody string = `	return CreateOption{
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        %s,
 	}
 `
@@ -70,7 +75,9 @@ func main() {
 			Field("Name", "string").
 			Field("Description", "string").
 			Field("Required", "bool").
-			Field("Choices", "[]Choice[any]")
+			Field("Choices", "[]Choice[any]").
+			Field("ChannelTypes", "[]ChannelType").
+			Field("Autocomplete", "bool")
 
 		constructorF := &genial.FuncB{}
 		constructorF.Namef("New%s", typeName).
@@ -81,6 +88,14 @@ func main() {
 			Parameter("choices", fmt.Sprintf("...Choice[%s]", v.Type)).
 			ReturnTypes("*"+typeName).
 			Writef(ConstructorBody, typeName)
+
+		channelTypesF := &genial.FuncB{}
+		channelTypesF.Name("ChanTypes").
+			Commentf("ChanTypes sets the options channel types").
+			Receiver("o", "*"+typeName).
+			ReturnTypes("*"+typeName).
+			Parameter("typs", "...ChannelType").
+			WriteString("\to.ChannelTypes = append(o.ChannelTypes, typs...)\n\treturn o\n")
 
 		createOptionF := &genial.FuncB{}
 		createOptionF.Name("createOption").
@@ -94,9 +109,21 @@ func main() {
 			Comment("MarshalJSON returns the JSON representation of the option").
 			Receiver("o", "*"+typeName).
 			ReturnTypes("[]byte", "error").
-			WriteString("\treturn json.Marshal(o.createOption())")
+			WriteString("\treturn json.Marshal(o.createOption())\n")
 
-		p.Declarations(typeOpt, constructorF, createOptionF, marshalF)
+		p.Declarations(typeOpt, constructorF, createOptionF, channelTypesF, marshalF)
+
+		if v.CanAutocomplete {
+			autocompleteF := &genial.FuncB{}
+			autocompleteF.Name("CanAutocomplete").
+				Commentf("CanAutocomplete sets the option as autocomplete-able").
+				Receiver("o", "*"+typeName).
+				ReturnTypes("*" + typeName).
+				WriteString("\to.Autocomplete = true\n\treturn o\n")
+
+			p.Declarations(autocompleteF)
+		}
+
 	}
 
 	os.WriteFile(*file, []byte(p.String()), 0o644)

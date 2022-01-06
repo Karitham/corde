@@ -4,54 +4,14 @@ package corde
 
 import "encoding/json"
 
-// IntOption represents a int option
-type IntOption struct {
-	Name        string
-	Description string
-	Required    bool
-	Choices     []Choice[any]
-}
-
-// NewIntOption returns a new IntOption
-func NewIntOption(name string, description string, required bool, choices ...Choice[int]) *IntOption {
-	o := &IntOption{
-		Name:        name,
-		Description: description,
-		Required:    required,
-	}
-
-	for _, choice := range choices {
-		o.Choices = append(
-			o.Choices,
-			Choice[any]{Name: choice.Name, Value: choice.Value},
-		)
-	}
-
-	return o
-}
-
-// createOption returns the CreateOption of the type
-func (o *IntOption) createOption() CreateOption {
-	return CreateOption{
-		Name:        o.Name,
-		Description: o.Description,
-		Required:    o.Required,
-		Choices:     o.Choices,
-		Type:        OPTION_INTEGER,
-	}
-}
-
-// MarshalJSON returns the JSON representation of the option
-func (o *IntOption) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o.createOption())
-}
-
 // BoolOption represents a bool option
 type BoolOption struct {
-	Name        string
+	Name string
 	Description string
-	Required    bool
-	Choices     []Choice[any]
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
 }
 
 // NewBoolOption returns a new BoolOption
@@ -60,6 +20,8 @@ func NewBoolOption(name string, description string, required bool, choices ...Ch
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -79,8 +41,16 @@ func (o *BoolOption) createOption() CreateOption {
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        OPTION_BOOLEAN,
 	}
+}
+
+// ChanTypes sets the options channel types
+func (o *BoolOption) ChanTypes(typs ...ChannelType) *BoolOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
 }
 
 // MarshalJSON returns the JSON representation of the option
@@ -90,10 +60,12 @@ func (o *BoolOption) MarshalJSON() ([]byte, error) {
 
 // UserOption represents a Snowflake option
 type UserOption struct {
-	Name        string
+	Name string
 	Description string
-	Required    bool
-	Choices     []Choice[any]
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
 }
 
 // NewUserOption returns a new UserOption
@@ -102,6 +74,8 @@ func NewUserOption(name string, description string, required bool, choices ...Ch
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -121,8 +95,16 @@ func (o *UserOption) createOption() CreateOption {
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        OPTION_USER,
 	}
+}
+
+// ChanTypes sets the options channel types
+func (o *UserOption) ChanTypes(typs ...ChannelType) *UserOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
 }
 
 // MarshalJSON returns the JSON representation of the option
@@ -132,10 +114,12 @@ func (o *UserOption) MarshalJSON() ([]byte, error) {
 
 // ChannelOption represents a Snowflake option
 type ChannelOption struct {
-	Name        string
+	Name string
 	Description string
-	Required    bool
-	Choices     []Choice[any]
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
 }
 
 // NewChannelOption returns a new ChannelOption
@@ -144,6 +128,8 @@ func NewChannelOption(name string, description string, required bool, choices ..
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -163,8 +149,16 @@ func (o *ChannelOption) createOption() CreateOption {
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        OPTION_CHANNEL,
 	}
+}
+
+// ChanTypes sets the options channel types
+func (o *ChannelOption) ChanTypes(typs ...ChannelType) *ChannelOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
 }
 
 // MarshalJSON returns the JSON representation of the option
@@ -174,10 +168,12 @@ func (o *ChannelOption) MarshalJSON() ([]byte, error) {
 
 // RoleOption represents a Snowflake option
 type RoleOption struct {
-	Name        string
+	Name string
 	Description string
-	Required    bool
-	Choices     []Choice[any]
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
 }
 
 // NewRoleOption returns a new RoleOption
@@ -186,6 +182,8 @@ func NewRoleOption(name string, description string, required bool, choices ...Ch
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -205,8 +203,16 @@ func (o *RoleOption) createOption() CreateOption {
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        OPTION_ROLE,
 	}
+}
+
+// ChanTypes sets the options channel types
+func (o *RoleOption) ChanTypes(typs ...ChannelType) *RoleOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
 }
 
 // MarshalJSON returns the JSON representation of the option
@@ -216,10 +222,12 @@ func (o *RoleOption) MarshalJSON() ([]byte, error) {
 
 // MentionableOption represents a Snowflake option
 type MentionableOption struct {
-	Name        string
+	Name string
 	Description string
-	Required    bool
-	Choices     []Choice[any]
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
 }
 
 // NewMentionableOption returns a new MentionableOption
@@ -228,6 +236,8 @@ func NewMentionableOption(name string, description string, required bool, choice
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -247,8 +257,16 @@ func (o *MentionableOption) createOption() CreateOption {
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        OPTION_MENTIONABLE,
 	}
+}
+
+// ChanTypes sets the options channel types
+func (o *MentionableOption) ChanTypes(typs ...ChannelType) *MentionableOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
 }
 
 // MarshalJSON returns the JSON representation of the option
@@ -256,54 +274,14 @@ func (o *MentionableOption) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.createOption())
 }
 
-// NumberOption represents a float64 option
-type NumberOption struct {
-	Name        string
-	Description string
-	Required    bool
-	Choices     []Choice[any]
-}
-
-// NewNumberOption returns a new NumberOption
-func NewNumberOption(name string, description string, required bool, choices ...Choice[float64]) *NumberOption {
-	o := &NumberOption{
-		Name:        name,
-		Description: description,
-		Required:    required,
-	}
-
-	for _, choice := range choices {
-		o.Choices = append(
-			o.Choices,
-			Choice[any]{Name: choice.Name, Value: choice.Value},
-		)
-	}
-
-	return o
-}
-
-// createOption returns the CreateOption of the type
-func (o *NumberOption) createOption() CreateOption {
-	return CreateOption{
-		Name:        o.Name,
-		Description: o.Description,
-		Required:    o.Required,
-		Choices:     o.Choices,
-		Type:        OPTION_NUMBER,
-	}
-}
-
-// MarshalJSON returns the JSON representation of the option
-func (o *NumberOption) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o.createOption())
-}
-
 // StringOption represents a string option
 type StringOption struct {
-	Name        string
+	Name string
 	Description string
-	Required    bool
-	Choices     []Choice[any]
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
 }
 
 // NewStringOption returns a new StringOption
@@ -312,6 +290,8 @@ func NewStringOption(name string, description string, required bool, choices ...
 		Name:        name,
 		Description: description,
 		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
 	}
 
 	for _, choice := range choices {
@@ -331,11 +311,145 @@ func (o *StringOption) createOption() CreateOption {
 		Description: o.Description,
 		Required:    o.Required,
 		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
 		Type:        OPTION_STRING,
 	}
+}
+
+// ChanTypes sets the options channel types
+func (o *StringOption) ChanTypes(typs ...ChannelType) *StringOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
 }
 
 // MarshalJSON returns the JSON representation of the option
 func (o *StringOption) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.createOption())
+}
+
+// CanAutocomplete sets the option as autocomplete-able
+func (o *StringOption) CanAutocomplete() *StringOption {
+	o.Autocomplete = true
+	return o
+}
+
+// IntOption represents a int option
+type IntOption struct {
+	Name string
+	Description string
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
+}
+
+// NewIntOption returns a new IntOption
+func NewIntOption(name string, description string, required bool, choices ...Choice[int]) *IntOption {
+	o := &IntOption{
+		Name:        name,
+		Description: description,
+		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
+	}
+
+	for _, choice := range choices {
+		o.Choices = append(
+			o.Choices,
+			Choice[any]{Name: choice.Name, Value: choice.Value},
+		)
+	}
+
+	return o
+}
+
+// createOption returns the CreateOption of the type
+func (o *IntOption) createOption() CreateOption {
+	return CreateOption{
+		Name:        o.Name,
+		Description: o.Description,
+		Required:    o.Required,
+		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
+		Type:        OPTION_INTEGER,
+	}
+}
+
+// ChanTypes sets the options channel types
+func (o *IntOption) ChanTypes(typs ...ChannelType) *IntOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
+}
+
+// MarshalJSON returns the JSON representation of the option
+func (o *IntOption) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.createOption())
+}
+
+// CanAutocomplete sets the option as autocomplete-able
+func (o *IntOption) CanAutocomplete() *IntOption {
+	o.Autocomplete = true
+	return o
+}
+
+// NumberOption represents a float64 option
+type NumberOption struct {
+	Name string
+	Description string
+	Required bool
+	Choices []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
+}
+
+// NewNumberOption returns a new NumberOption
+func NewNumberOption(name string, description string, required bool, choices ...Choice[float64]) *NumberOption {
+	o := &NumberOption{
+		Name:        name,
+		Description: description,
+		Required:    required,
+		Choices:     []Choice[any]{},
+		ChannelTypes: []ChannelType{},
+	}
+
+	for _, choice := range choices {
+		o.Choices = append(
+			o.Choices,
+			Choice[any]{Name: choice.Name, Value: choice.Value},
+		)
+	}
+
+	return o
+}
+
+// createOption returns the CreateOption of the type
+func (o *NumberOption) createOption() CreateOption {
+	return CreateOption{
+		Name:        o.Name,
+		Description: o.Description,
+		Required:    o.Required,
+		Choices:     o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
+		Type:        OPTION_NUMBER,
+	}
+}
+
+// ChanTypes sets the options channel types
+func (o *NumberOption) ChanTypes(typs ...ChannelType) *NumberOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
+}
+
+// MarshalJSON returns the JSON representation of the option
+func (o *NumberOption) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.createOption())
+}
+
+// CanAutocomplete sets the option as autocomplete-able
+func (o *NumberOption) CanAutocomplete() *NumberOption {
+	o.Autocomplete = true
+	return o
 }
