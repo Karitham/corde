@@ -42,9 +42,11 @@ func main() {
 	m := corde.NewMux(pk, appID, token)
 	m.Route("todo", func(m *corde.Mux) {
 		m.Command("add", t.addHandler)
-		m.Command("rm", t.removeHandler)
 		m.Command("list", t.listHandler)
-		m.Autocomplete("rm", t.autoCompleteNames)
+		m.Route("rm", func(m *corde.Mux) {
+			m.Command("", t.removeHandler)
+			m.Autocomplete("", t.autoCompleteNames)
+		}
 	})
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
