@@ -31,7 +31,7 @@ func NewEmbed() *EmbedB {
 }
 
 // B returns the built Embed
-func (b *EmbedB) B() Embed { return b.Embed }
+func (b *EmbedB) Build() Embed { return b.Embed }
 
 // Author adds the author to the Embed
 func (b *EmbedB) Author(a Author) *EmbedB {

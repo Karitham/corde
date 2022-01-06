@@ -15,6 +15,15 @@ type Responder struct {
 	w http.ResponseWriter
 }
 
+type InteractionResponseDataBuilder interface {
+	Build() *InteractionRespData
+}
+
+// Build implements InteractionResponseDataBuilder interface
+func (i *InteractionRespData) Build() *InteractionRespData {
+	return i
+}
+
 var _ ResponseWriter = &Responder{}
 
 type intResponse struct {
@@ -22,35 +31,35 @@ type intResponse struct {
 	Data *InteractionRespData `json:"data,omitempty"`
 }
 
-// pong responds to pings on the gateway
-func (r *Responder) pong() {
+// Pong responds to pings on the gateway
+func (r *Responder) Pong() {
 	r.w.Header().Set("content-type", "application/json")
 	json.NewEncoder(r.w).Encode(intResponse{Type: 1})
 }
 
 // Respond responds to the interaction directly
-func (r *Responder) Respond(i *InteractionRespData) {
-	r.respond(intResponse{Type: 4, Data: i})
+func (r *Responder) Respond(i InteractionResponseDataBuilder) {
+	r.respond(intResponse{Type: 4, Data: i.Build()})
 }
 
 // DeferedRespond responds in defered
-func (r *Responder) DeferedRespond(i *InteractionRespData) {
-	r.respond(intResponse{Type: 5, Data: i})
+func (r *Responder) DeferedRespond(i InteractionResponseDataBuilder) {
+	r.respond(intResponse{Type: 5, Data: i.Build()})
 }
 
 // Update updates the target message
-func (r *Responder) Update(i *InteractionRespData) {
-	r.respond(intResponse{Type: 7, Data: i})
+func (r *Responder) Update(i InteractionResponseDataBuilder) {
+	r.respond(intResponse{Type: 7, Data: i.Build()})
 }
 
 // DeferedUpdate updates the target message in defered
-func (r *Responder) DeferedUpdate(i *InteractionRespData) {
-	r.respond(intResponse{Type: 6, Data: i})
+func (r *Responder) DeferedUpdate(i InteractionResponseDataBuilder) {
+	r.respond(intResponse{Type: 6, Data: i.Build()})
 }
 
 // Autocomplete responds to the interaction with autocomplete data
-func (r *Responder) Autocomplete(i *InteractionRespData) {
-	r.respond(intResponse{Type: 8, Data: i})
+func (r *Responder) Autocomplete(i InteractionResponseDataBuilder) {
+	r.respond(intResponse{Type: 8, Data: i.Build()})
 }
 
 func (r *Responder) respond(i intResponse) {
