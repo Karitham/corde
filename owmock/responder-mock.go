@@ -8,11 +8,11 @@ import (
 
 // ResponseWriterMock mocks corde's ResponseWriter interface
 type ResponseWriterMock struct {
-	RespondHook        func(corde.InteractionResponseDataBuilder)
-	DeferedRespondHook func(corde.InteractionResponseDataBuilder)
-	UpdateHook         func(corde.InteractionResponseDataBuilder)
-	DeferedUpdateHook  func(corde.InteractionResponseDataBuilder)
-	AutocompleteHook   func(corde.InteractionResponseDataBuilder)
+	RespondHook        func(corde.InteractionResponder)
+	DeferedRespondHook func(corde.InteractionResponder)
+	UpdateHook         func(corde.InteractionResponder)
+	DeferedUpdateHook  func(corde.InteractionResponder)
+	AutocompleteHook   func(corde.InteractionResponder)
 
 	T *testing.T
 }
@@ -26,7 +26,7 @@ func NewRWMock(t *testing.T) ResponseWriterMock {
 func (r ResponseWriterMock) Pong() {}
 
 // Response implements ResponseWriter interface
-func (r ResponseWriterMock) Respond(i corde.InteractionResponseDataBuilder) {
+func (r ResponseWriterMock) Respond(i corde.InteractionResponder) {
 	if r.RespondHook != nil {
 		r.RespondHook(i)
 		return
@@ -36,7 +36,7 @@ func (r ResponseWriterMock) Respond(i corde.InteractionResponseDataBuilder) {
 }
 
 // DeferedRespond implements ResponseWriter interface
-func (r ResponseWriterMock) DeferedRespond(i corde.InteractionResponseDataBuilder) {
+func (r ResponseWriterMock) DeferedRespond(i corde.InteractionResponder) {
 	if r.DeferedRespondHook != nil {
 		r.DeferedRespondHook(i)
 		return
@@ -46,7 +46,7 @@ func (r ResponseWriterMock) DeferedRespond(i corde.InteractionResponseDataBuilde
 }
 
 // Update implements ResponseWriter interface
-func (r ResponseWriterMock) Update(i corde.InteractionResponseDataBuilder) {
+func (r ResponseWriterMock) Update(i corde.InteractionResponder) {
 	if r.UpdateHook != nil {
 		r.UpdateHook(i)
 		return
@@ -56,7 +56,7 @@ func (r ResponseWriterMock) Update(i corde.InteractionResponseDataBuilder) {
 }
 
 // DeferedUpdate implements ResponseWriter interface
-func (r ResponseWriterMock) DeferedUpdate(i corde.InteractionResponseDataBuilder) {
+func (r ResponseWriterMock) DeferedUpdate(i corde.InteractionResponder) {
 	if r.DeferedUpdateHook != nil {
 		r.DeferedUpdateHook(i)
 		return
@@ -66,7 +66,7 @@ func (r ResponseWriterMock) DeferedUpdate(i corde.InteractionResponseDataBuilder
 }
 
 // Autocomplete implements ResponseWriter interface
-func (r ResponseWriterMock) Autocomplete(i corde.InteractionResponseDataBuilder) {
+func (r ResponseWriterMock) Autocomplete(i corde.InteractionResponder) {
 	if r.AutocompleteHook != nil {
 		r.AutocompleteHook(i)
 		return
