@@ -38,7 +38,7 @@ func main() {
 	}
 }
 
-func bongoHandler(w corde.ResponseWriter, _ *corde.Interaction) {
+func bongoHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) {
 	resp, err := http.Get("https://cdn.discordapp.com/emojis/745709799890747434.gif?size=128")
 	if err != nil {
 		w.Respond(corde.NewResp().Content("couldn't retrieve bongo").Ephemeral())

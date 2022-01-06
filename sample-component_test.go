@@ -11,11 +11,11 @@ import (
 )
 
 func TestComponentInteraction(t *testing.T) {
-	is := is.New(t)
+	assert := is.New(t)
 	pub, _ := owmock.GenerateKeys()
 	mux := corde.NewMux(pub, 0, "")
 
-	mux.Button("click_one", func(w corde.ResponseWriter, _ *corde.Interaction) {
+	mux.Button("click_one", func(w corde.ResponseWriter, _ *corde.InteractionRequest) {
 		w.Respond(&corde.InteractionRespData{
 			Content: "Hello World!",
 		})
@@ -30,13 +30,13 @@ func TestComponentInteraction(t *testing.T) {
 
 	s := httptest.NewServer(mux.Handler())
 	respPost, err := owmock.NewWithClient(s.URL, s.Client()).Post(SampleComponent)
-	is.NoErr(err)
+	assert.NoErr(err)
 
 	respV := &owmock.InteractionResponse{}
 	err = json.Unmarshal(respPost, respV)
-	is.NoErr(err)
+	assert.NoErr(err)
 
-	is.Equal(expect, respV)
+	assert.Equal(expect, respV)
 }
 
 const SampleComponent = `{
