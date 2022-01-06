@@ -46,7 +46,7 @@ func main() {
 		m.Route("rm", func(m *corde.Mux) {
 			m.Command("", t.removeHandler)
 			m.Autocomplete("", t.autoCompleteNames)
-		}
+		})
 	})
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
