@@ -130,12 +130,12 @@ type Handler func(ResponseWriter, *Interaction)
 // ResponseWriter handles responding to interactions
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
 type ResponseWriter interface {
-	pong()
-	Respond(i *InteractionRespData)
-	DeferedRespond(i *InteractionRespData)
-	Update(i *InteractionRespData)
-	DeferedUpdate(i *InteractionRespData)
-	Autocomplete(i *InteractionRespData)
+	Pong()
+	Respond(InteractionResponseDataBuilder)
+	DeferedRespond(InteractionResponseDataBuilder)
+	Update(InteractionResponseDataBuilder)
+	DeferedUpdate(InteractionResponseDataBuilder)
+	Autocomplete(InteractionResponseDataBuilder)
 }
 
 // ListenAndServe starts the gateway listening to events
@@ -171,7 +171,7 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 	defer m.rMu.RUnlock()
 	switch i.Type {
 	case PING:
-		r.pong()
+		r.Pong()
 		return
 	case MESSAGE_COMPONENT:
 		if _, h, ok := m.routes.component.LongestPrefix(i.Data.CustomID); ok {

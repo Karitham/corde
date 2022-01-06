@@ -73,8 +73,7 @@ func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *
 		w.Respond(corde.NewResp().
 			ActionRow(nextBtn).
 			Ephemeral().
-			Content("Click on the buttons to move between existing commands and or delete them.").
-			B(),
+			Content("Click on the buttons to move between existing commands and or delete them."),
 		)
 	}
 }
@@ -85,11 +84,11 @@ func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedI
 		defer mu.Unlock()
 		commands, err := m.GetCommands(g)
 		if err != nil {
-			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral().B())
+			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral())
 			return
 		}
 		if len(commands) == 0 {
-			w.Update(corde.NewResp().Content("No commands found.").Ephemeral().B())
+			w.Update(corde.NewResp().Content("No commands found.").Ephemeral())
 			return
 		}
 
@@ -98,8 +97,7 @@ func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedI
 		w.Update(corde.NewResp().
 			Contentf("%s - %s", commands[*selectedID].Name, commands[*selectedID].Description).
 			ActionRow(nextBtn, delBtn).
-			Ephemeral().
-			B(),
+			Ephemeral(),
 		)
 	}
 }
@@ -110,7 +108,7 @@ func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selecte
 		defer mu.Unlock()
 		commands, err := m.GetCommands(g)
 		if err != nil {
-			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral().B())
+			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral())
 			return
 		}
 		c := commands[*selectedID]
@@ -123,8 +121,7 @@ func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selecte
 		w.Update(corde.NewResp().
 			Contentf("%s - %s", commands[*selectedID].Name, commands[*selectedID].Description).
 			ActionRow(nextBtn, delBtn).
-			Ephemeral().
-			B(),
+			Ephemeral(),
 		)
 	}
 }
