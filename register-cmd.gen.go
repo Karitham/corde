@@ -4,60 +4,6 @@ package corde
 
 import "encoding/json"
 
-// MentionableOption represents a Snowflake option
-type MentionableOption struct {
-	Name         string
-	Description  string
-	Required     bool
-	Choices      []Choice[any]
-	ChannelTypes []ChannelType
-	Autocomplete bool
-}
-
-// NewMentionableOption returns a new MentionableOption
-func NewMentionableOption(name, description string, required bool, choices ...Choice[Snowflake]) *MentionableOption {
-	o := &MentionableOption{
-		Name:         name,
-		Description:  description,
-		Required:     required,
-		Choices:      []Choice[any]{},
-		ChannelTypes: []ChannelType{},
-	}
-
-	for _, choice := range choices {
-		o.Choices = append(
-			o.Choices,
-			Choice[any]{Name: choice.Name, Value: choice.Value},
-		)
-	}
-
-	return o
-}
-
-// createOption returns the CreateOption of the type
-func (o *MentionableOption) createOption() CreateOption {
-	return CreateOption{
-		Name:         o.Name,
-		Description:  o.Description,
-		Required:     o.Required,
-		Choices:      o.Choices,
-		ChannelTypes: o.ChannelTypes,
-		Autocomplete: o.Autocomplete,
-		Type:         OPTION_MENTIONABLE,
-	}
-}
-
-// ChanTypes sets the options channel types
-func (o *MentionableOption) ChanTypes(typs ...ChannelType) *MentionableOption {
-	o.ChannelTypes = append(o.ChannelTypes, typs...)
-	return o
-}
-
-// MarshalJSON returns the JSON representation of the option
-func (o *MentionableOption) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o.createOption())
-}
-
 // StringOption represents a string option
 type StringOption struct {
 	Name         string
@@ -69,7 +15,7 @@ type StringOption struct {
 }
 
 // NewStringOption returns a new StringOption
-func NewStringOption(name, description string, required bool, choices ...Choice[string]) *StringOption {
+func NewStringOption(name string, description string, required bool, choices ...Choice[string]) *StringOption {
 	o := &StringOption{
 		Name:         name,
 		Description:  description,
@@ -129,7 +75,7 @@ type IntOption struct {
 }
 
 // NewIntOption returns a new IntOption
-func NewIntOption(name, description string, required bool, choices ...Choice[int]) *IntOption {
+func NewIntOption(name string, description string, required bool, choices ...Choice[int]) *IntOption {
 	o := &IntOption{
 		Name:         name,
 		Description:  description,
@@ -189,7 +135,7 @@ type NumberOption struct {
 }
 
 // NewNumberOption returns a new NumberOption
-func NewNumberOption(name, description string, required bool, choices ...Choice[float64]) *NumberOption {
+func NewNumberOption(name string, description string, required bool, choices ...Choice[float64]) *NumberOption {
 	o := &NumberOption{
 		Name:         name,
 		Description:  description,
@@ -249,7 +195,7 @@ type BoolOption struct {
 }
 
 // NewBoolOption returns a new BoolOption
-func NewBoolOption(name, description string, required bool, choices ...Choice[bool]) *BoolOption {
+func NewBoolOption(name string, description string, required bool, choices ...Choice[bool]) *BoolOption {
 	o := &BoolOption{
 		Name:         name,
 		Description:  description,
@@ -303,7 +249,7 @@ type UserOption struct {
 }
 
 // NewUserOption returns a new UserOption
-func NewUserOption(name, description string, required bool, choices ...Choice[Snowflake]) *UserOption {
+func NewUserOption(name string, description string, required bool, choices ...Choice[Snowflake]) *UserOption {
 	o := &UserOption{
 		Name:         name,
 		Description:  description,
@@ -357,7 +303,7 @@ type ChannelOption struct {
 }
 
 // NewChannelOption returns a new ChannelOption
-func NewChannelOption(name, description string, required bool, choices ...Choice[Snowflake]) *ChannelOption {
+func NewChannelOption(name string, description string, required bool, choices ...Choice[Snowflake]) *ChannelOption {
 	o := &ChannelOption{
 		Name:         name,
 		Description:  description,
@@ -411,7 +357,7 @@ type RoleOption struct {
 }
 
 // NewRoleOption returns a new RoleOption
-func NewRoleOption(name, description string, required bool, choices ...Choice[Snowflake]) *RoleOption {
+func NewRoleOption(name string, description string, required bool, choices ...Choice[Snowflake]) *RoleOption {
 	o := &RoleOption{
 		Name:         name,
 		Description:  description,
@@ -451,5 +397,59 @@ func (o *RoleOption) ChanTypes(typs ...ChannelType) *RoleOption {
 
 // MarshalJSON returns the JSON representation of the option
 func (o *RoleOption) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.createOption())
+}
+
+// MentionableOption represents a Snowflake option
+type MentionableOption struct {
+	Name         string
+	Description  string
+	Required     bool
+	Choices      []Choice[any]
+	ChannelTypes []ChannelType
+	Autocomplete bool
+}
+
+// NewMentionableOption returns a new MentionableOption
+func NewMentionableOption(name string, description string, required bool, choices ...Choice[Snowflake]) *MentionableOption {
+	o := &MentionableOption{
+		Name:         name,
+		Description:  description,
+		Required:     required,
+		Choices:      []Choice[any]{},
+		ChannelTypes: []ChannelType{},
+	}
+
+	for _, choice := range choices {
+		o.Choices = append(
+			o.Choices,
+			Choice[any]{Name: choice.Name, Value: choice.Value},
+		)
+	}
+
+	return o
+}
+
+// createOption returns the CreateOption of the type
+func (o *MentionableOption) createOption() CreateOption {
+	return CreateOption{
+		Name:         o.Name,
+		Description:  o.Description,
+		Required:     o.Required,
+		Choices:      o.Choices,
+		ChannelTypes: o.ChannelTypes,
+		Autocomplete: o.Autocomplete,
+		Type:         OPTION_MENTIONABLE,
+	}
+}
+
+// ChanTypes sets the options channel types
+func (o *MentionableOption) ChanTypes(typs ...ChannelType) *MentionableOption {
+	o.ChannelTypes = append(o.ChannelTypes, typs...)
+	return o
+}
+
+// MarshalJSON returns the JSON representation of the option
+func (o *MentionableOption) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.createOption())
 }
