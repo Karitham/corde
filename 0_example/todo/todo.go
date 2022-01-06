@@ -36,7 +36,7 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Interaction) {
 		value: value,
 	}
 
-	w.Respond(corde.NewResp().Contentf("Sucessfully added %s", name).Ephemeral())
+	w.Respond(corde.NewResp().Contentf("Successfully added %s", name).Ephemeral())
 }
 
 func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Interaction) {

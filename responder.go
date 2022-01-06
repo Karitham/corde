@@ -16,12 +16,7 @@ type Responder struct {
 }
 
 type InteractionResponseDataBuilder interface {
-	Build() *InteractionRespData
-}
-
-// Build implements InteractionResponseDataBuilder interface
-func (i *InteractionRespData) Build() *InteractionRespData {
-	return i
+	InteractionRespData() *InteractionRespData
 }
 
 var _ ResponseWriter = &Responder{}
@@ -39,27 +34,27 @@ func (r *Responder) Pong() {
 
 // Respond responds to the interaction directly
 func (r *Responder) Respond(i InteractionResponseDataBuilder) {
-	r.respond(intResponse{Type: 4, Data: i.Build()})
+	r.respond(intResponse{Type: 4, Data: i.InteractionRespData()})
 }
 
 // DeferedRespond responds in defered
 func (r *Responder) DeferedRespond(i InteractionResponseDataBuilder) {
-	r.respond(intResponse{Type: 5, Data: i.Build()})
+	r.respond(intResponse{Type: 5, Data: i.InteractionRespData()})
 }
 
 // Update updates the target message
 func (r *Responder) Update(i InteractionResponseDataBuilder) {
-	r.respond(intResponse{Type: 7, Data: i.Build()})
+	r.respond(intResponse{Type: 7, Data: i.InteractionRespData()})
 }
 
 // DeferedUpdate updates the target message in defered
 func (r *Responder) DeferedUpdate(i InteractionResponseDataBuilder) {
-	r.respond(intResponse{Type: 6, Data: i.Build()})
+	r.respond(intResponse{Type: 6, Data: i.InteractionRespData()})
 }
 
 // Autocomplete responds to the interaction with autocomplete data
 func (r *Responder) Autocomplete(i InteractionResponseDataBuilder) {
-	r.respond(intResponse{Type: 8, Data: i.Build()})
+	r.respond(intResponse{Type: 8, Data: i.InteractionRespData()})
 }
 
 func (r *Responder) respond(i intResponse) {
