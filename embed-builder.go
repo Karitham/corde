@@ -33,7 +33,7 @@ func NewEmbed() *EmbedB {
 // Embed returns the built Embed
 func (e *EmbedB) Embed() Embed { return e.embed }
 
-// InteractionRespData implements InteractionResponseDataBuilder
+// InteractionRespData implements InteractionResponder
 func (e *EmbedB) InteractionRespData() *InteractionRespData {
 	return &InteractionRespData{
 		Embeds: []Embed{e.Embed()},

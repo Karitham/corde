@@ -18,7 +18,7 @@ type InteractionRespData struct {
 	Attachments     []Attachment     `json:"attachments,omitempty"`
 }
 
-// InteractionRespData implements InteractionResponseDataBuilder interface
+// InteractionRespData implements InteractionResponder interface
 func (i *InteractionRespData) InteractionRespData() *InteractionRespData {
 	return i
 }
@@ -69,12 +69,12 @@ type Embed struct {
 	Fields      []Field    `json:"fields,omitempty"`
 }
 
-// Embed fulfills EmbedBuilder
+// Embed implements Embedder
 func (e Embed) Embed() Embed {
 	return e
 }
 
-// InteractionRespData implements InteractionResponseDataBuilder
+// InteractionRespData implements InteractionResponder
 func (e Embed) InteractionRespData() *InteractionRespData {
 	return &InteractionRespData{
 		Embeds: []Embed{e},

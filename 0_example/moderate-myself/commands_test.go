@@ -20,7 +20,7 @@ func Test_list(t *testing.T) {
 		{
 			name: "list",
 			mock: owmock.ResponseWriterMock{
-				RespondHook: func(i corde.InteractionResponseDataBuilder) {
+				RespondHook: func(i corde.InteractionResponder) {
 					data := i.InteractionRespData()
 					if data.Content != "Click on the buttons to move between existing commands and or delete them." {
 						t.Errorf("expected 'no todos' got %s", data.Content)
@@ -52,7 +52,7 @@ func Test_btnNext(t *testing.T) {
 			name: "btn next",
 			mock: owmock.ResponseWriterMock{
 				T: t,
-				UpdateHook: func(i corde.InteractionResponseDataBuilder) {
+				UpdateHook: func(i corde.InteractionResponder) {
 					data := i.InteractionRespData()
 					if data.Content == "" {
 						t.Error("expected some sort of response")

@@ -26,12 +26,12 @@ func NewResp() *RespB {
 	}
 }
 
-// EmbedBuilder is an Embed builder
-type EmbedBuilder interface {
+// Embedder returns an Embed
+type Embedder interface {
 	Embed() Embed
 }
 
-// InteractionRespData implements InteractionResponseDataBuilder
+// InteractionRespData implements InteractionResponder
 func (r *RespB) InteractionRespData() *InteractionRespData { return r.resp }
 
 // Content adds the content to the InteractionRespData
@@ -53,7 +53,7 @@ func (r *RespB) TTS(tts bool) *RespB {
 }
 
 // Embeds adds embeds to the InteractionRespData
-func (r *RespB) Embeds(e ...EmbedBuilder) *RespB {
+func (r *RespB) Embeds(e ...Embedder) *RespB {
 	for _, eb := range e {
 		r.resp.Embeds = append(r.resp.Embeds, eb.Embed())
 	}
