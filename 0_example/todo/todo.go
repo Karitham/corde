@@ -55,7 +55,7 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Interaction) {
 			Description(func() string {
 				s, i := &strings.Builder{}, 1
 				for k, v := range t.list {
-					s.WriteString(fmt.Sprintf("%d. %s: %s - %s\n", i, k, v.value, format.User(v.user.String())))
+					s.WriteString(fmt.Sprintf("%d. %s: %s - %s\n", i, k, v.value, format.User(v.user)))
 					i++
 				}
 				return s.String()

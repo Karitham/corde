@@ -2,7 +2,6 @@
 
 package corde
 
-
 // String returns the option with key k of type string
 func (o OptionsInteractions) String(k string) string {
 	var v string

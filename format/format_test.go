@@ -5,57 +5,110 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Karitham/corde"
+
 	"github.com/matryer/is"
 )
 
-const testID = "1234567890"
+const testIDString = "1234567890"
 
-func TestFormat(t *testing.T) {
-	tt := []struct {
-		Name     string
-		Fmt      func(string) string
-		Expected string
-	}{
+var testIDSnowflake = corde.SnowflakeFromString(testIDString)
+
+type testcase[T ID] struct {
+	Name     string
+	Fmt      func(T) string
+	Expected string
+}
+
+func TestFormatString(t *testing.T) {
+	tt := []testcase[string]{
 		{
 			Name:     "User",
-			Fmt:      User,
-			Expected: fmt.Sprintf("<@%s>", testID),
+			Fmt:      User[string],
+			Expected: fmt.Sprintf("<@%s>", testIDString),
 		},
 		{
 			Name:     "UserNick",
-			Fmt:      UserNick,
-			Expected: fmt.Sprintf("<@!%s>", testID),
+			Fmt:      UserNick[string],
+			Expected: fmt.Sprintf("<@!%s>", testIDString),
 		},
 		{
 			Name:     "Channel",
-			Fmt:      Channel,
-			Expected: fmt.Sprintf("<#%s>", testID),
+			Fmt:      Channel[string],
+			Expected: fmt.Sprintf("<#%s>", testIDString),
 		},
 		{
 			Name:     "Role",
-			Fmt:      Role,
-			Expected: fmt.Sprintf("<@&%s>", testID),
+			Fmt:      Role[string],
+			Expected: fmt.Sprintf("<@&%s>", testIDString),
 		},
 		{
 			Name: "Emoji",
 			Fmt: func(s string) string {
 				return Emoji("test", s)
 			},
-			Expected: fmt.Sprintf("<:test:%s>", testID),
+			Expected: fmt.Sprintf("<:test:%s>", testIDString),
 		},
 		{
 			Name: "AnimatedEmoji",
 			Fmt: func(s string) string {
 				return AnimatedEmoji("test", s)
 			},
-			Expected: fmt.Sprintf("<a:test:%s>", testID),
+			Expected: fmt.Sprintf("<a:test:%s>", testIDString),
 		},
 	}
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
 			assert := is.New(t)
-			out := tc.Fmt(testID)
+			out := tc.Fmt(testIDString)
+			assert.Equal(out, tc.Expected) // Formatted should match expected
+		})
+	}
+}
+
+func TestFormatSnowflake(t *testing.T) {
+	tt := []testcase[corde.Snowflake]{
+		{
+			Name:     "User",
+			Fmt:      User[corde.Snowflake],
+			Expected: fmt.Sprintf("<@%s>", testIDString),
+		},
+		{
+			Name:     "UserNick",
+			Fmt:      UserNick[corde.Snowflake],
+			Expected: fmt.Sprintf("<@!%s>", testIDString),
+		},
+		{
+			Name:     "Channel",
+			Fmt:      Channel[corde.Snowflake],
+			Expected: fmt.Sprintf("<#%s>", testIDString),
+		},
+		{
+			Name:     "Role",
+			Fmt:      Role[corde.Snowflake],
+			Expected: fmt.Sprintf("<@&%s>", testIDString),
+		},
+		{
+			Name: "Emoji",
+			Fmt: func(s corde.Snowflake) string {
+				return Emoji("test", s)
+			},
+			Expected: fmt.Sprintf("<:test:%s>", testIDString),
+		},
+		{
+			Name: "AnimatedEmoji",
+			Fmt: func(s corde.Snowflake) string {
+				return AnimatedEmoji("test", s)
+			},
+			Expected: fmt.Sprintf("<a:test:%s>", testIDString),
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			assert := is.New(t)
+			out := tc.Fmt(testIDSnowflake)
 			assert.Equal(out, tc.Expected) // Formatted should match expected
 		})
 	}

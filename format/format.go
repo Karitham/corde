@@ -4,35 +4,42 @@ package format
 import (
 	"fmt"
 	"time"
+
+	"github.com/Karitham/corde"
 )
 
+// ID is a Discord ID, either in string form or corde.Snowflake form
+type ID interface {
+	~string | corde.Snowflake
+}
+
 // User returns a user mention
-func User(id string) string {
+func User[T ID](id T) string {
 	return fmt.Sprintf("<@%s>", id)
 }
 
 // UserNick returns a user (nickname) mention
-func UserNick(id string) string {
+func UserNick[T ID](id T) string {
 	return fmt.Sprintf("<@!%s>", id)
 }
 
 // Channel returns a channel mention
-func Channel(id string) string {
+func Channel[T ID](id T) string {
 	return fmt.Sprintf("<#%s>", id)
 }
 
 // Role returns a role mention
-func Role(id string) string {
+func Role[T ID](id T) string {
 	return fmt.Sprintf("<@&%s>", id)
 }
 
 // Emoji returns a custom emoji
-func Emoji(name, id string) string {
+func Emoji[T ID](name string, id T) string {
 	return fmt.Sprintf("<:%s:%s>", name, id)
 }
 
 // AnimatedEmoji returns a custom animated emoji
-func AnimatedEmoji(name, id string) string {
+func AnimatedEmoji[T ID](name string, id T) string {
 	return fmt.Sprintf("<a:%s:%s>", name, id)
 }
 
