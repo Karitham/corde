@@ -6,110 +6,108 @@ import (
 )
 
 // RespB is an InteractionRespData builder
-// https://regex101.com/r/tKfloG/2
 type RespB struct {
-	*InteractionRespData
+	resp *InteractionRespData
 }
 
 // NewResp Returns a new response builder
 func NewResp() *RespB {
-	return &RespB{InteractionRespData: &InteractionRespData{}}
+	return &RespB{resp: &InteractionRespData{}}
 }
 
-// EmbedBuilder is an Embed builder
-type EmbedBuilder interface {
-	Build() Embed
+// Embedder returns an Embed
+type Embedder interface {
+	Embed() Embed
 }
 
-// Build returns the build InteractionRespData
-func (b *RespB) Build() *InteractionRespData { return b.InteractionRespData }
+// InteractionRespData implements InteractionResponder
+func (r *RespB) InteractionRespData() *InteractionRespData { return r.resp }
 
 // Content adds the content to the InteractionRespData
-func (b *RespB) Content(s string) *RespB {
-	b.InteractionRespData.Content = s
-	return b
+func (r *RespB) Content(s string) *RespB {
+	r.resp.Content = s
+	return r
 }
 
 // Contentf adds the content to the InteractionRespData
-func (b *RespB) Contentf(s string, args ...any) *RespB {
-	b.InteractionRespData.Content = fmt.Sprintf(s, args...)
-	return b
+func (r *RespB) Contentf(s string, args ...any) *RespB {
+	r.resp.Content = fmt.Sprintf(s, args...)
+	return r
 }
 
 // TTS adds the tts to the InteractionRespData
-func (b *RespB) TTS(tts bool) *RespB {
-	b.InteractionRespData.TTS = tts
-	return b
+func (r *RespB) TTS(tts bool) *RespB {
+	r.resp.TTS = tts
+	return r
 }
 
 // Embeds adds embeds to the InteractionRespData
-func (b *RespB) Embeds(e ...EmbedBuilder) *RespB {
+func (r *RespB) Embeds(e ...Embedder) *RespB {
 	for _, eb := range e {
-		b.InteractionRespData.Embeds = append(b.InteractionRespData.Embeds, eb.Build())
+		r.resp.Embeds = append(r.resp.Embeds, eb.Embed())
 	}
-	return b
+	return r
 }
 
 // AllowedMentions adds the allowed mentions to the InteractionRespData
-func (b *RespB) AllowedMentions(a *AllowedMentions) *RespB {
-	b.InteractionRespData.AllowedMentions = a
-	return b
+func (r *RespB) AllowedMentions(a *AllowedMentions) *RespB {
+	r.resp.AllowedMentions = a
+	return r
 }
 
 // Flags adds the flags to the InteractionRespData
-func (b *RespB) Flags(i IntResponseFlags) *RespB {
-	b.InteractionRespData.Flags = i
-	return b
+func (r *RespB) Flags(i IntResponseFlags) *RespB {
+	r.resp.Flags = i
+	return r
 }
 
 // Ephemeral adds the ephemeral flag to the InteractionRespData
-func (b *RespB) Ephemeral() *RespB {
-	b.InteractionRespData.Flags = RESPONSE_FLAGS_EPHEMERAL
-	return b
+func (r *RespB) Ephemeral() *RespB {
+	r.resp.Flags = RESPONSE_FLAGS_EPHEMERAL
+	return r
 }
 
 // Components adds components to the InteractionRespData
 func (b *RespB) Components(c ...Component) *RespB {
-	if b.InteractionRespData.Components == nil {
-		b.InteractionRespData.Components = []Component{}
+	if b.resp.Components == nil {
+		b.resp.Components = []Component{}
 	}
 
-	b.InteractionRespData.Components = append(b.InteractionRespData.Components, c...)
+	b.resp.Components = append(b.resp.Components, c...)
 	return b
 }
 
 // ActionRow adds an action row to the InteractionRespData
 func (b *RespB) ActionRow(c ...Component) *RespB {
-	if b.InteractionRespData.Components == nil {
-		b.InteractionRespData.Components = []Component{}
+	if b.resp.Components == nil {
+		b.resp.Components = []Component{}
 	}
 
-	b.InteractionRespData.Components = append(b.InteractionRespData.Components,
+	b.resp.Components = append(b.resp.Components,
 		Component{
 			Type:       COMPONENT_ACTION_ROW,
 			Components: c,
-		},
-	)
+		})
 	return b
 }
 
 // Attachments adds attachments to the InteractionRespData
 func (b *RespB) Attachments(a ...Attachment) *RespB {
-	if b.InteractionRespData.Attachments == nil {
-		b.InteractionRespData.Attachments = []Attachment{}
+	if b.resp.Attachments == nil {
+		b.resp.Attachments = []Attachment{}
 	}
 
-	b.InteractionRespData.Attachments = append(b.InteractionRespData.Attachments, a...)
+	b.resp.Attachments = append(b.resp.Attachments, a...)
 	return b
 }
 
 // Attachement adds an attachment to the InteractionRespData
 func (b *RespB) Attachment(body io.Reader, filename string) *RespB {
-	if b.InteractionRespData.Attachments == nil {
-		b.InteractionRespData.Attachments = []Attachment{}
+	if b.resp.Attachments == nil {
+		b.resp.Attachments = []Attachment{}
 	}
 
-	b.InteractionRespData.Attachments = append(b.InteractionRespData.Attachments, Attachment{
+	b.resp.Attachments = append(b.resp.Attachments, Attachment{
 		Body:     body,
 		Filename: filename,
 	})
@@ -118,11 +116,11 @@ func (b *RespB) Attachment(body io.Reader, filename string) *RespB {
 
 // Choice adds a choice to the InteractionRespData
 func (b *RespB) Choice(name string, value any) *RespB {
-	if b.InteractionRespData.Choices == nil {
-		b.InteractionRespData.Choices = []Choice[any]{}
+	if b.resp.Choices == nil {
+		b.resp.Choices = []Choice[any]{}
 	}
 
-	b.InteractionRespData.Choices = append(b.InteractionRespData.Choices, Choice[any]{
+	b.resp.Choices = append(b.resp.Choices, Choice[any]{
 		Name:  name,
 		Value: value,
 	})
@@ -132,10 +130,10 @@ func (b *RespB) Choice(name string, value any) *RespB {
 
 // Choices adds choices to the InteractionRespData
 func (b *RespB) Choices(c ...Choice[any]) *RespB {
-	if b.InteractionRespData.Choices == nil {
-		b.InteractionRespData.Choices = []Choice[any]{}
+	if b.resp.Choices == nil {
+		b.resp.Choices = []Choice[any]{}
 	}
 
-	b.InteractionRespData.Choices = append(b.InteractionRespData.Choices, c...)
+	b.resp.Choices = append(b.resp.Choices, c...)
 	return b
 }

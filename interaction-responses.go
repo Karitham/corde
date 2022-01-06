@@ -19,6 +19,11 @@ type InteractionRespData struct {
 	Choices         []Choice[any]    `json:"choices,omitempty"`
 }
 
+// InteractionRespData implements InteractionResponder interface
+func (i *InteractionRespData) InteractionRespData() *InteractionRespData {
+	return i
+}
+
 type IntResponseFlags uint
 
 const (
@@ -63,6 +68,18 @@ type Embed struct {
 	Provider    Provider   `json:"provider,omitempty"`
 	Author      Author     `json:"author,omitempty"`
 	Fields      []Field    `json:"fields,omitempty"`
+}
+
+// Embed implements Embedder
+func (e Embed) Embed() Embed {
+	return e
+}
+
+// InteractionRespData implements InteractionResponder
+func (e Embed) InteractionRespData() *InteractionRespData {
+	return &InteractionRespData{
+		Embeds: []Embed{e},
+	}
 }
 
 // Timestamp is a discord timestamp
