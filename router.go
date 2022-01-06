@@ -114,7 +114,12 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		PublicKey: publicKey,
 		BasePath:  "/",
 		OnNotFound: func(_ ResponseWriter, i *Interaction) {
-			log.Printf("No handler for registered command: %s\n", i.Data.Name)
+			n := i.Data.Name
+			for r, o := range i.Data.Options {
+				n += fmt.Sprintf("/%s=%s", r, o.String())
+			}
+
+			log.Printf("No handler for registered command: %s\n", n)
 		},
 		Client: &http.Client{
 			Timeout: 10 * time.Second,
@@ -183,7 +188,12 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 			(*h)(r, i)
 			return
 		}
-		for optName := range i.Data.Options {
+		for optName, optV := range i.Data.Options {
+			// Subcommands cannot have values :)
+			if optV != nil {
+				continue
+			}
+
 			nr := i.Data.Name + "/" + optName
 			if _, h, ok := m.routes.command.LongestPrefix(nr); ok {
 				i.Data.Name = nr
@@ -195,6 +205,20 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
 			(*h)(r, i)
 			return
+		}
+
+		for optName, optV := range i.Data.Options {
+			// Subcommands cannot have values :)
+			if optV != nil {
+				continue
+			}
+
+			nr := i.Data.Name + "/" + optName
+			if _, h, ok := m.routes.autocomplete.LongestPrefix(nr); ok {
+				i.Data.Name = nr
+				(*h)(r, i)
+				return
+			}
 		}
 	}
 	m.OnNotFound(r, i)

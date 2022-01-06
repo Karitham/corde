@@ -14,12 +14,16 @@ type CreateOptioner interface {
 
 // CreateOption is the base option type for creating any sort of option
 type CreateOption struct {
-	Name        string           `json:"name"`
-	Type        OptionType       `json:"type"`
-	Description string           `json:"description,omitempty"`
-	Required    bool             `json:"required,omitempty"`
-	Options     []CreateOptioner `json:"options,omitempty"`
-	Choices     []Choice[any]    `json:"choices,omitempty"`
+	Name         string           `json:"name"`
+	Type         OptionType       `json:"type"`
+	Description  string           `json:"description,omitempty"`
+	Required     bool             `json:"required,omitempty"`
+	Choices      []Choice[any]    `json:"choices,omitempty"`
+	Options      []CreateOptioner `json:"options,omitempty"`
+	ChannelTypes []ChannelType    `json:"channel_types,omitempty"`
+	MinValue     float64          `json:"min_value,omitempty"`
+	MaxValue     float64          `json:"max_value,omitempty"`
+	Autocomplete bool             `json:"autocomplete,omitempty"`
 }
 
 func (c CreateOption) createOption() CreateOption {

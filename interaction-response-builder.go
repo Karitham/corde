@@ -6,24 +6,13 @@ import (
 )
 
 // RespB is an InteractionRespData builder
-// https://regex101.com/r/tKfloG/2
 type RespB struct {
 	resp *InteractionRespData
 }
 
 // NewResp Returns a new response builder
 func NewResp() *RespB {
-	return &RespB{
-		resp: &InteractionRespData{
-			Content:         "",
-			TTS:             false,
-			Embeds:          []Embed{},
-			AllowedMentions: &AllowedMentions{},
-			Flags:           0,
-			Components:      []Component{},
-			Attachments:     []Attachment{},
-		},
-	}
+	return &RespB{resp: &InteractionRespData{}}
 }
 
 // Embedder returns an Embed
@@ -79,33 +68,72 @@ func (r *RespB) Ephemeral() *RespB {
 }
 
 // Components adds components to the InteractionRespData
-func (r *RespB) Components(c ...Component) *RespB {
-	r.resp.Components = append(r.resp.Components, c...)
-	return r
+func (b *RespB) Components(c ...Component) *RespB {
+	if b.resp.Components == nil {
+		b.resp.Components = []Component{}
+	}
+
+	b.resp.Components = append(b.resp.Components, c...)
+	return b
 }
 
 // ActionRow adds an action row to the InteractionRespData
-func (r *RespB) ActionRow(c ...Component) *RespB {
-	r.resp.Components = append(r.resp.Components,
+func (b *RespB) ActionRow(c ...Component) *RespB {
+	if b.resp.Components == nil {
+		b.resp.Components = []Component{}
+	}
+
+	b.resp.Components = append(b.resp.Components,
 		Component{
 			Type:       COMPONENT_ACTION_ROW,
 			Components: c,
-		},
-	)
-	return r
+		})
+	return b
 }
 
 // Attachments adds attachments to the InteractionRespData
-func (r *RespB) Attachments(a ...Attachment) *RespB {
-	r.resp.Attachments = append(r.resp.Attachments, a...)
-	return r
+func (b *RespB) Attachments(a ...Attachment) *RespB {
+	if b.resp.Attachments == nil {
+		b.resp.Attachments = []Attachment{}
+	}
+
+	b.resp.Attachments = append(b.resp.Attachments, a...)
+	return b
 }
 
-// Attachment adds an attachment to the InteractionRespData
-func (r *RespB) Attachment(body io.Reader, filename string) *RespB {
-	r.resp.Attachments = append(r.resp.Attachments, Attachment{
+// Attachement adds an attachment to the InteractionRespData
+func (b *RespB) Attachment(body io.Reader, filename string) *RespB {
+	if b.resp.Attachments == nil {
+		b.resp.Attachments = []Attachment{}
+	}
+
+	b.resp.Attachments = append(b.resp.Attachments, Attachment{
 		Body:     body,
 		Filename: filename,
 	})
-	return r
+	return b
+}
+
+// Choice adds a choice to the InteractionRespData
+func (b *RespB) Choice(name string, value any) *RespB {
+	if b.resp.Choices == nil {
+		b.resp.Choices = []Choice[any]{}
+	}
+
+	b.resp.Choices = append(b.resp.Choices, Choice[any]{
+		Name:  name,
+		Value: value,
+	})
+
+	return b
+}
+
+// Choices adds choices to the InteractionRespData
+func (b *RespB) Choices(c ...Choice[any]) *RespB {
+	if b.resp.Choices == nil {
+		b.resp.Choices = []Choice[any]{}
+	}
+
+	b.resp.Choices = append(b.resp.Choices, c...)
+	return b
 }

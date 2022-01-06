@@ -29,3 +29,8 @@ func (m *JsonRaw) UnmarshalJSON(data []byte) error {
 func (m JsonRaw) UnmarshalTo(v any) error {
 	return json.Unmarshal(m, v)
 }
+
+// String returns the raw json as a string
+func (m JsonRaw) String() string {
+	return string(m)
+}

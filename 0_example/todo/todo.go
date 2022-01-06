@@ -19,6 +19,23 @@ type todoItem struct {
 	value string
 }
 
+func (t *todo) autoCompleteNames(w corde.ResponseWriter, i *corde.Interaction) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	if len(t.list) == 0 {
+		w.Autocomplete(corde.NewResp())
+		return
+	}
+
+	resp := corde.NewResp()
+	for k := range t.list {
+		resp.Choice(k, k)
+	}
+
+	w.Autocomplete(resp)
+}
+
 func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Interaction) {
 	value := i.Data.Options.String("value")
 	name := i.Data.Options.String("name")

@@ -16,7 +16,7 @@ var commands = corde.NewSlashCommand("todo", "view edit and remove todos",
 		corde.NewUserOption("user", "assign it to a user", false),
 	),
 	corde.NewSubcommand("rm", "remove a todo",
-		corde.NewStringOption("name", "todo name", true),
+		corde.NewStringOption("name", "todo name", true).CanAutocomplete(),
 	),
 )
 
@@ -42,8 +42,11 @@ func main() {
 	m := corde.NewMux(pk, appID, token)
 	m.Route("todo", func(m *corde.Mux) {
 		m.Command("add", t.addHandler)
-		m.Command("rm", t.removeHandler)
 		m.Command("list", t.listHandler)
+		m.Route("rm", func(m *corde.Mux) {
+			m.Command("", t.removeHandler)
+			m.Autocomplete("", t.autoCompleteNames)
+		})
 	})
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))

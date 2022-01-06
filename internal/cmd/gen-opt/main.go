@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"go/format"
 	"os"
 	"strings"
 
@@ -51,5 +52,6 @@ func main() {
 		p.Declarations(f)
 	}
 
-	os.WriteFile(*file, []byte(p.String()), 0o644)
+	b, _ := format.Source([]byte(p.String()))
+	os.WriteFile(*file, b, 0o644)
 }
