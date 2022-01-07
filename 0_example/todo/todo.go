@@ -42,7 +42,7 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
 
 	user := i.Data.Options.Snowflake("user")
 	if user == 0 {
-		user = i.User.ID
+		user = i.Member.User.ID
 	}
 
 	t.mu.Lock()
@@ -65,20 +65,17 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) 
 		return
 	}
 
-	w.Respond(corde.NewResp().
-		Embeds(corde.NewEmbed().
-			Title("Todo list").
-			Color(0x69b00b).
-			Description(func() string {
-				// build todo list description
-				s, i := &strings.Builder{}, 1
-				for k, v := range t.list {
-					s.WriteString(fmt.Sprintf("%d. %s: %s - %s\n", i, k, v.value, format.User(v.user)))
-					i++
-				}
-				return s.String()
-			}()),
-		),
+	i := 1
+	s := &strings.Builder{}
+	for k, v := range t.list {
+		s.WriteString(fmt.Sprintf("%d. %s: %s - %s\n", i, k, v.value, format.User(v.user)))
+		i++
+	}
+
+	w.Respond(corde.NewEmbed().
+		Title("Todo list").
+		Description(s.String()).
+		Color(0x69b00b),
 	)
 }
 
