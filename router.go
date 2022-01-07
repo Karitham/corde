@@ -1,6 +1,7 @@
 package corde
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -113,7 +114,7 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		},
 		PublicKey: publicKey,
 		BasePath:  "/",
-		OnNotFound: func(_ ResponseWriter, i *Interaction) {
+		OnNotFound: func(_ ResponseWriter, i *InteractionRequest) {
 			n := i.Data.Name
 			for r, o := range i.Data.Options {
 				n += fmt.Sprintf("/%s=%s", r, o.String())
@@ -130,7 +131,7 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 }
 
 // Handler handles incoming requests
-type Handler func(ResponseWriter, *Interaction)
+type Handler func(ResponseWriter, *InteractionRequest)
 
 // ResponseWriter handles responding to interactions
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
@@ -141,6 +142,12 @@ type ResponseWriter interface {
 	Update(InteractionResponder)
 	DeferedUpdate(InteractionResponder)
 	Autocomplete(InteractionResponder)
+}
+
+// InteractionRequest is an incoming request Interaction
+type InteractionRequest struct {
+	*Interaction
+	Context context.Context
 }
 
 // ListenAndServe starts the gateway listening to events
@@ -160,7 +167,9 @@ func (m *Mux) Handler() http.Handler {
 
 // route handles routing the requests
 func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
-	i := &Interaction{}
+	i := &InteractionRequest{
+		Context: r.Context(),
+	}
 	if err := json.NewDecoder(r.Body).Decode(i); err != nil {
 		log.Println("Errors unmarshalling json: ", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -171,7 +180,7 @@ func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
 }
 
 // routeReq is a recursive implementation to route requests
-func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
+func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 	m.rMu.RLock()
 	defer m.rMu.RUnlock()
 	switch i.Type {
@@ -222,14 +231,6 @@ func (m *Mux) routeReq(r ResponseWriter, i *Interaction) {
 		}
 	}
 	m.OnNotFound(r, i)
-}
-
-// reqOpts applies functions on an http request.
-// useful for setting headers
-func reqOpts(req *http.Request, h ...func(*http.Request)) {
-	for _, option := range h {
-		option(req)
-	}
 }
 
 // authorize adds the Authorization header to the request
