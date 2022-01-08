@@ -52,7 +52,7 @@ Then comes [**todo**](0_example/todo/) that shows off subcommands routing and op
 And then we have [**moderate-myself**](0_example/moderate-myself/main.go) which is able to show and delete currently available commands.
 It demonstrates the usage of components such as buttons.
 
-Finaly, we have [**nft**](0_example/nft/main.go) which is a simple example using user commands & message commands.
+Finally, we have [**nft**](0_example/nft/main.go) which is a simple example using user commands & message commands.
 
 Corde is also actively used to rewrite and develop another discord bot of mine called [**WaifuBot**](https://github.com/Karitham/WaifuBot/) (for now see the corde branch)
 
