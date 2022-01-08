@@ -50,14 +50,9 @@ func main() {
 }
 
 func NFTuser(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	url := ""
-	username := ""
-	// Because it's a map, it's the only way to get back the user's name & profile pic URL
-	for _, u := range i.Data.Resolved.Users {
-		url = u.AvatarURL()
-		username = u.Username
-		break
-	}
+	user := i.Data.Resolved.Users.First()
+	url := user.AvatarURL()
+	username := user.Username
 
 	if url == "" {
 		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", username).Ephemeral())
@@ -79,14 +74,9 @@ func NFTuser(w corde.ResponseWriter, i *corde.InteractionRequest) {
 }
 
 func NFTmessage(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	var chanID corde.Snowflake
-	var msgID corde.Snowflake
-	// Because it's a map, it's the only way to get back the msg reference
-	for _, m := range i.Data.Resolved.Messages {
-		chanID = m.ChannelID
-		msgID = m.ID
-		break
-	}
+	msg := i.Data.Resolved.Messages.First()
+	chanID := msg.ChannelID
+	msgID := msg.ID
 
 	message := fmt.Sprintf("https://discordapp.com/channels/%d/%d/%d", i.GuildID, chanID, msgID)
 	w.Respond(corde.NewResp().

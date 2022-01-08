@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	genial "github.com/karitham/go-genial"
+	"github.com/karitham/go-genial"
 )
 
 var types = []string{
@@ -23,9 +23,13 @@ var types = []string{
 	"any",
 }
 
-var body string = `	var v %s
-	_ = o[k].UnmarshalTo(&v)
-	return v
+var body = `	var v %s
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 `
 
 var file = flag.String("file", "../../../interaction-opt.gen.go", "output file")
@@ -42,10 +46,10 @@ func main() {
 
 		f := &genial.FuncB{}
 		f.Receiver("o", "OptionsInteractions").
-			Commentf("%s returns the option with key k of type %s", name, t).
+			Commentf("%s returns the Option with key k of type %s", name, t).
 			Name(name).
 			Parameter("k", "string").
-			ReturnTypes(t).
+			ReturnTypes(t, "error").
 			Writef(body, t)
 
 		p.Declarations(f)

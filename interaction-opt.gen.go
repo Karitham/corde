@@ -2,86 +2,134 @@
 
 package corde
 
-// String returns the option with key k of type string
-func (o OptionsInteractions) String(k string) string {
+// String returns the Option with key k of type string
+func (o OptionsInteractions) String(k string) (string, error) {
 	var v string
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Int returns the option with key k of type int
-func (o OptionsInteractions) Int(k string) int {
+// Int returns the Option with key k of type int
+func (o OptionsInteractions) Int(k string) (int, error) {
 	var v int
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Int32 returns the option with key k of type int32
-func (o OptionsInteractions) Int32(k string) int32 {
+// Int32 returns the Option with key k of type int32
+func (o OptionsInteractions) Int32(k string) (int32, error) {
 	var v int32
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Int64 returns the option with key k of type int64
-func (o OptionsInteractions) Int64(k string) int64 {
+// Int64 returns the Option with key k of type int64
+func (o OptionsInteractions) Int64(k string) (int64, error) {
 	var v int64
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Uint returns the option with key k of type uint
-func (o OptionsInteractions) Uint(k string) uint {
+// Uint returns the Option with key k of type uint
+func (o OptionsInteractions) Uint(k string) (uint, error) {
 	var v uint
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Uint32 returns the option with key k of type uint32
-func (o OptionsInteractions) Uint32(k string) uint32 {
+// Uint32 returns the Option with key k of type uint32
+func (o OptionsInteractions) Uint32(k string) (uint32, error) {
 	var v uint32
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Uint64 returns the option with key k of type uint64
-func (o OptionsInteractions) Uint64(k string) uint64 {
+// Uint64 returns the Option with key k of type uint64
+func (o OptionsInteractions) Uint64(k string) (uint64, error) {
 	var v uint64
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Float32 returns the option with key k of type float32
-func (o OptionsInteractions) Float32(k string) float32 {
+// Float32 returns the Option with key k of type float32
+func (o OptionsInteractions) Float32(k string) (float32, error) {
 	var v float32
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Float64 returns the option with key k of type float64
-func (o OptionsInteractions) Float64(k string) float64 {
+// Float64 returns the Option with key k of type float64
+func (o OptionsInteractions) Float64(k string) (float64, error) {
 	var v float64
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Bool returns the option with key k of type bool
-func (o OptionsInteractions) Bool(k string) bool {
+// Bool returns the Option with key k of type bool
+func (o OptionsInteractions) Bool(k string) (bool, error) {
 	var v bool
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Snowflake returns the option with key k of type Snowflake
-func (o OptionsInteractions) Snowflake(k string) Snowflake {
+// Snowflake returns the Option with key k of type Snowflake
+func (o OptionsInteractions) Snowflake(k string) (Snowflake, error) {
 	var v Snowflake
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
 
-// Any returns the option with key k of type any
-func (o OptionsInteractions) Any(k string) any {
+// Any returns the Option with key k of type any
+func (o OptionsInteractions) Any(k string) (any, error) {
 	var v any
-	_ = o[k].UnmarshalTo(&v)
-	return v
+	if raw, ok := o[k]; ok {
+		if err := raw.UnmarshalTo(&v); err != nil {
+			return v, err
+		}
+	}
+	return v, nil
 }
