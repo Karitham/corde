@@ -37,19 +37,19 @@ func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.InteractionReq
 }
 
 func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	value := i.Data.Options.String("value")
-	name := i.Data.Options.String("name")
+	value, _ := i.Data.Options.String("value")
+	name, _ := i.Data.Options.String("name")
 
-	user := i.Data.Options.Snowflake("user")
-	if user == 0 {
-		user = i.Member.User.ID
+	user, err := i.Data.OptionsUser("user")
+	if err != nil {
+		user = i.Member.User
 	}
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	t.list[name] = todoItem{
-		user:  user,
+		user:  user.ID,
 		value: value,
 	}
 
@@ -83,7 +83,7 @@ func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.InteractionRequest
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	name := i.Data.Options.String("name")
+	name, _ := i.Data.Options.String("name")
 	if _, ok := t.list[name]; !ok {
 		w.Respond(corde.NewResp().Contentf("%s not found", name).Ephemeral())
 		return

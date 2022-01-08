@@ -122,30 +122,75 @@ type InteractionData struct {
 	TargetID      Snowflake           `json:"target_id,omitempty"`
 }
 
-func (i InteractionData) OptionsUser(k string) User {
-	s := i.Options.Snowflake(k)
-	return i.Resolved.Users[s]
+// OptionsUser returns the resolved User for an Option
+func (i InteractionData) OptionsUser(k string) (User, error) {
+	var u User
+	s, err := i.Options.Snowflake(k)
+	if err != nil {
+		return u, err
+	}
+	u, ok := i.Resolved.Users[s]
+	if !ok {
+		return u, fmt.Errorf("no user found for option %q", k)
+	}
+	return u, nil
 }
 
-func (i InteractionData) OptionsMember(k string) Member {
-	s := i.Options.Snowflake(k)
-	m := i.Resolved.Members[s]
-	m.User = i.Resolved.Users[s]
-	return m
+// OptionsMember returns the resolved Member (and User) for an Option
+func (i InteractionData) OptionsMember(k string) (Member, error) {
+	var m Member
+	s, err := i.Options.Snowflake(k)
+	if err != nil {
+		return m, err
+	}
+	m, ok := i.Resolved.Members[s]
+	if !ok {
+		return m, fmt.Errorf("no member found for option %q", k)
+	}
+
+	m.User, err = i.OptionsUser(k)
+	if err != nil {
+		return m, err
+	}
+	return m, nil
 }
 
-func (i InteractionData) OptionsRole(k string) Role {
-	s := i.Options.Snowflake(k)
-	return i.Resolved.Roles[s]
+// OptionsRole returns the resolved Role for an Option
+func (i InteractionData) OptionsRole(k string) (Role, error) {
+	var r Role
+	s, err := i.Options.Snowflake(k)
+	if err != nil {
+		return r, err
+	}
+	r, ok := i.Resolved.Roles[s]
+	if !ok {
+		return r, fmt.Errorf("no role found for option %q", k)
+	}
+	return r, nil
 }
 
-func (i InteractionData) OptionsMessage(k string) Message {
-	s := i.Options.Snowflake(k)
-	return i.Resolved.Messages[s]
+// OptionsMessage returns the resolved Message for an Option
+func (i InteractionData) OptionsMessage(k string) (Message, error) {
+	var m Message
+	s, err := i.Options.Snowflake(k)
+	if err != nil {
+		return m, err
+	}
+	m, ok := i.Resolved.Messages[s]
+	if !ok {
+		return m, fmt.Errorf("no member message for option %q", k)
+	}
+	return m, nil
 }
 
-type ResolvedData[T interface{ User | Member | Role | Message }] map[Snowflake]T
+type ResolvedDataConstraint interface {
+	User | Member | Role | Message
+}
 
+// ResolvedData is a generic mapping of Snowflakes to resolved data structs
+type ResolvedData[T ResolvedDataConstraint] map[Snowflake]T
+
+// First returns the first resolved data
 func (r ResolvedData[T]) First() T {
 	for _, v := range r {
 		return v
