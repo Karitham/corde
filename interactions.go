@@ -76,24 +76,24 @@ type Message struct {
 	Timestamp       time.Time    `json:"timestamp"`
 	Pinned          bool         `json:"pinned"`
 	MentionEveryone bool         `json:"mention_everyone"`
-	ID              string       `json:"id"`
+	ID              Snowflake    `json:"id"`
 	Flags           int          `json:"flags"`
 	Embeds          []Embed      `json:"embeds"`
 	EditedTimestamp *time.Time   `json:"edited_timestamp"`
 	Content         string       `json:"content"`
 	Components      []Component  `json:"components"`
-	ChannelID       string       `json:"channel_id"`
+	ChannelID       Snowflake    `json:"channel_id"`
 	Author          Author       `json:"author"`
 	Attachments     []Attachment `json:"attachments"`
 }
 
 // MessageAuthor is a Discord MessageAuthor
 type MessageAuthor struct {
-	Username      string `json:"username"`
-	PublicFlags   int    `json:"public_flags"`
-	ID            string `json:"id"`
-	Discriminator string `json:"discriminator"`
-	Avatar        string `json:"avatar"`
+	Username      string    `json:"username"`
+	PublicFlags   int       `json:"public_flags"`
+	ID            Snowflake `json:"id"`
+	Discriminator string    `json:"discriminator"`
+	Avatar        Hash      `json:"avatar"`
 }
 
 // Role is a user's role
@@ -111,20 +111,22 @@ type Role struct {
 
 // InteractionData is data from a Discord Interaction
 type InteractionData struct {
-	ID       Snowflake `json:"id"`
-	Name     string    `json:"name"`
-	Type     int       `json:"type"`
-	Resolved struct {
-		Users    map[Snowflake]User    `json:"users,omitempty"`
-		Members  map[Snowflake]Member  `json:"members,omitempty"`
-		Roles    map[Snowflake]Role    `json:"roles,omitempty"`
-		Messages map[Snowflake]Message `json:"messages,omitempty"`
-	}
-	Options       OptionsInteractions `json:"options"`
-	CustomID      string              `json:"custom_id"`
+	ID            Snowflake           `json:"id"`
+	Name          string              `json:"name"`
+	Type          int                 `json:"type"`
+	Resolved      Resolved            `json:"resolved,omitempty"`
+	Options       OptionsInteractions `json:"options,omitempty"`
+	CustomID      string              `json:"custom_id,omitempty"`
 	ComponentType ComponentType       `json:"component_type"`
-	Values        []any               `json:"values"` // ?
-	TagetID       Snowflake           `json:"target_id"`
+	Values        []any               `json:"values,omitempty"`
+	TagetID       Snowflake           `json:"target_id,omitempty"`
+}
+
+type Resolved struct {
+	Users    map[Snowflake]User    `json:"users,omitempty"`
+	Members  map[Snowflake]Member  `json:"members,omitempty"`
+	Roles    map[Snowflake]Role    `json:"roles,omitempty"`
+	Messages map[Snowflake]Message `json:"messages,omitempty"`
 }
 
 // OptionsInteractions is the options for an Interaction
@@ -221,6 +223,7 @@ type User struct {
 	ID            Snowflake `json:"id"`
 	Username      string    `json:"username"`
 	Discriminator string    `json:"discriminator"`
+	Nick          string    `json:"nick,omitempty"`
 	Avatar        Hash      `json:"avatar,omitempty"`
 	Bot           bool      `json:"bot,omitempty"`
 	System        bool      `json:"system,omitempty"`

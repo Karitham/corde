@@ -56,6 +56,22 @@ func NewSlashCommand(name string, description string, options ...CreateOptioner)
 	}
 }
 
+// NewUserCommand returns a new user command
+func NewUserCommand(name string) CreateCommand {
+	return CreateCommand{
+		Name: name,
+		Type: COMMAND_USER,
+	}
+}
+
+// NewMessageCommand returns a new message command
+func NewMessageCommand(name string) CreateCommand {
+	return CreateCommand{
+		Name: name,
+		Type: COMMAND_MESSAGE,
+	}
+}
+
 func (c CreateCommand) createCommand() CreateCommand {
 	return CreateCommand{
 		Name:        c.Name,

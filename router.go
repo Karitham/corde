@@ -152,9 +152,8 @@ type InteractionRequest struct {
 
 // ListenAndServe starts the gateway listening to events
 func (m *Mux) ListenAndServe(addr string) error {
-	validator := rest.Verify(m.PublicKey)
 	r := http.NewServeMux()
-	r.Handle(m.BasePath, validator(http.HandlerFunc(m.route)))
+	r.Handle(m.BasePath, m.Handler())
 
 	return http.ListenAndServe(addr, r)
 }
@@ -193,7 +192,9 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 			return
 		}
 	case APPLICATION_COMMAND:
-		if _, h, ok := m.routes.command.LongestPrefix(i.Data.Name); ok {
+		// for menu & app commands, which can have spaces
+		path := strings.ReplaceAll(i.Data.Name, " ", "/")
+		if _, h, ok := m.routes.command.LongestPrefix(path); ok {
 			(*h)(r, i)
 			return
 		}
