@@ -119,14 +119,45 @@ type InteractionData struct {
 	CustomID      string              `json:"custom_id,omitempty"`
 	ComponentType ComponentType       `json:"component_type"`
 	Values        []any               `json:"values,omitempty"`
-	TagetID       Snowflake           `json:"target_id,omitempty"`
+	TargetID      Snowflake           `json:"target_id,omitempty"`
+}
+
+func (i InteractionData) OptionsUser(k string) User {
+	s := i.Options.Snowflake(k)
+	return i.Resolved.Users[s]
+}
+
+func (i InteractionData) OptionsMember(k string) Member {
+	s := i.Options.Snowflake(k)
+	m := i.Resolved.Members[s]
+	m.User = i.Resolved.Users[s]
+	return m
+}
+
+func (i InteractionData) OptionsRole(k string) Role {
+	s := i.Options.Snowflake(k)
+	return i.Resolved.Roles[s]
+}
+
+func (i InteractionData) OptionsMessage(k string) Message {
+	s := i.Options.Snowflake(k)
+	return i.Resolved.Messages[s]
+}
+
+type ResolvedData[T interface{ User | Member | Role | Message }] map[Snowflake]T
+
+func (r ResolvedData[T]) First() T {
+	for _, v := range r {
+		return v
+	}
+	return *new(T)
 }
 
 type Resolved struct {
-	Users    map[Snowflake]User    `json:"users,omitempty"`
-	Members  map[Snowflake]Member  `json:"members,omitempty"`
-	Roles    map[Snowflake]Role    `json:"roles,omitempty"`
-	Messages map[Snowflake]Message `json:"messages,omitempty"`
+	Users    ResolvedData[User]    `json:"users,omitempty"`
+	Members  ResolvedData[Member]  `json:"members,omitempty"`
+	Roles    ResolvedData[Role]    `json:"roles,omitempty"`
+	Messages ResolvedData[Message] `json:"messages,omitempty"`
 }
 
 // OptionsInteractions is the options for an Interaction
