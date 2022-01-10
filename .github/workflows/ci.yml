@@ -21,3 +21,9 @@ jobs:
         run: go test -race -v ./...
       - name: Run Vet
         run: go vet ./...
+      - name: Example Compliance
+        run: |
+          go build ./0_example/bongo
+          go build ./0_example/moderate-myself
+          go build ./0_example/nft
+          go build ./0_example/todo
