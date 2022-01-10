@@ -191,6 +191,8 @@ type ResolvedDataConstraint interface {
 type ResolvedData[T ResolvedDataConstraint] map[Snowflake]T
 
 // First returns the first resolved data
+// ResolvedData is a map (which is unordered), so First
+// should only be used when ResolvedData has a single element.
 func (r ResolvedData[T]) First() T {
 	for _, v := range r {
 		return v
