@@ -1,11 +1,7 @@
 package corde
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
 )
 
@@ -59,36 +55,7 @@ func (r *Responder) Autocomplete(i InteractionResponder) {
 }
 
 func (r *Responder) respond(i intResponse) {
-	payloadJSON := &bytes.Buffer{}
-	err := json.NewEncoder(payloadJSON).Encode(i)
-	if err != nil {
-		return
-	}
-
-	if len(i.Data.Attachments) < 1 {
-		r.w.Header().Set("content-type", "application/json")
-		payloadJSON.WriteTo(r.w)
-		return
-	}
-
-	mw := multipart.NewWriter(r.w)
-	defer mw.Close()
-
-	r.w.Header().Set("Content-Type", mw.FormDataContentType())
-	mw.WriteField("payload_json", payloadJSON.String())
-
-	for i, f := range i.Data.Attachments {
-		if f.ID == 0 {
-			f.ID = Snowflake(i)
-		}
-
-		ff, CFerr := mw.CreateFormFile(fmt.Sprintf("files[%d]", i), f.Filename)
-		if CFerr != nil {
-			return
-		}
-
-		if _, CopyErr := io.Copy(ff, f.Body); CopyErr != nil {
-			return
-		}
-	}
+	body, contentType := toBody(i.Data)
+	r.w.Header().Set("content-type", contentType)
+	body.WriteTo(r.w)
 }

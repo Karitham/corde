@@ -84,7 +84,7 @@ func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]Command, error) {
 	r.Append("commands")
 
 	var commands []Command
-	_, err := rest.DoJson(m.Client, r.Get(m.authorize, rest.JSON), &commands)
+	_, err := rest.DoJSON(m.Client, r.Get(m.authorize, rest.JSON), &commands)
 	if err != nil {
 		return nil, err
 	}

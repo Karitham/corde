@@ -50,6 +50,7 @@ func (r *Request) Append(v ...any) *Request {
 	for _, val := range v {
 		r.path = path.Join(r.path, fmt.Sprint(val))
 	}
+	r.path = path.Clean(r.path)
 	return r
 }
 
@@ -67,6 +68,10 @@ func (r *Request) Get(opts ...func(*http.Request)) *http.Request {
 
 func (r *Request) Delete(opts ...func(*http.Request)) *http.Request {
 	return r.new(http.MethodDelete, r.body, opts...)
+}
+
+func (r *Request) Patch(opts ...func(*http.Request)) *http.Request {
+	return r.new(http.MethodPatch, r.body, opts...)
 }
 
 func JSON(r *http.Request) {
