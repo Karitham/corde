@@ -23,7 +23,7 @@ func TestComponentInteraction(t *testing.T) {
 
 	expect := &owmock.InteractionResponse{
 		Type: 4,
-		Data: owmock.InteractionResponseData{
+		Data: corde.InteractionRespData{
 			Content: "Hello World!",
 		},
 	}

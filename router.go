@@ -49,11 +49,11 @@ func (m *Mux) Mount(typ InteractionType, route string, handler Handler) {
 	defer m.rMu.Unlock()
 
 	switch typ {
-	case APPLICATION_COMMAND:
+	case INTERACTION_TYPE_APPLICATION_COMMAND:
 		m.routes.command.Insert(route, &handler)
-	case APPLICATION_COMMAND_AUTOCOMPLETE:
+	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
 		m.routes.autocomplete.Insert(route, &handler)
-	case MESSAGE_COMPONENT:
+	case INTERACTION_TYPE_MESSAGE_COMPONENT:
 		m.routes.component.Insert(route, &handler)
 	}
 }
@@ -183,15 +183,15 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 	m.rMu.RLock()
 	defer m.rMu.RUnlock()
 	switch i.Type {
-	case PING:
+	case INTERACTION_TYPE_PING:
 		r.Pong()
 		return
-	case MESSAGE_COMPONENT:
+	case INTERACTION_TYPE_MESSAGE_COMPONENT:
 		if _, h, ok := m.routes.component.LongestPrefix(i.Data.CustomID); ok {
 			(*h)(r, i)
 			return
 		}
-	case APPLICATION_COMMAND:
+	case INTERACTION_TYPE_APPLICATION_COMMAND:
 		// for menu & app commands, which can have spaces
 		path := strings.ReplaceAll(i.Data.Name, " ", "/")
 		if _, h, ok := m.routes.command.LongestPrefix(path); ok {
@@ -211,7 +211,7 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 				return
 			}
 		}
-	case APPLICATION_COMMAND_AUTOCOMPLETE:
+	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
 		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
 			(*h)(r, i)
 			return

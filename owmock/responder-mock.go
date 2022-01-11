@@ -74,3 +74,10 @@ func (r ResponseWriterMock) Autocomplete(i corde.InteractionResponder) {
 
 	r.T.Error("unexpected autocomplete hook called")
 }
+
+// type	interaction callback type	the type of response
+// data?	interaction callback data	an optional response message
+type InteractionResponse struct {
+	Type corde.InteractionType     `json:"type"`
+	Data corde.InteractionRespData `json:"data,omitempty"`
+}

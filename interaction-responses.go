@@ -107,7 +107,7 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 }
 
 func (t Timestamp) String() string {
-	return time.Time(t).UTC().Format("2006-01-02T15:04:05-0700")
+	return time.Time(t).UTC().Format(time.RFC3339)
 }
 
 // Author is the author object
@@ -141,7 +141,7 @@ type Image struct {
 }
 
 type MessageReference struct {
-	MessageID string `json:"message_id"`
+	MessageID Snowflake `json:"message_id"`
 }
 
 // Video is an embed video
