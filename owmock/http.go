@@ -6,10 +6,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"reflect"
 	"strconv"
+	"testing"
 	"time"
 
 	"github.com/matryer/is"
@@ -44,8 +44,6 @@ func req(c Doer, method string, url string, buf *bytes.Buffer, privK ed25519.Pri
 	if err = json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
 		return nil, err
 	}
-
-	log.Println(string(respBody))
 	return respBody, nil
 }
 
@@ -103,15 +101,16 @@ func (r *Requester) Post(body string) (json.RawMessage, error) {
 }
 
 // PostExpect posts a payload and expects a response with the given body
-func (r *Requester) PostExpect(t is.T, body any, expectV any) error {
+func (r *Requester) PostExpect(t *testing.T, body string, expectV any) error {
 	is := is.New(t)
-	resp, err := r.PostJSON(body)
+	resp, err := r.Post(body)
 	is.NoErr(err)
 
-	typ := reflect.TypeOf(expectV)
+	typ := reflect.TypeOf(expectV).Elem()
 	respV := reflect.New(typ).Interface()
 
-	err = json.Unmarshal(resp, respV)
+	b, _ := resp.MarshalJSON()
+	err = json.Unmarshal(b, respV)
 	is.NoErr(err)
 
 	is.Equal(respV, expectV)
