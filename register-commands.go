@@ -32,18 +32,23 @@ func (c CreateOption) createOption() CreateOption {
 
 // CreateCommand is a slash command that can be registered to discord
 type CreateCommand struct {
-	Name        string           `json:"name,omitempty"`
-	Description string           `json:"description,omitempty"`
-	Type        CommandType      `json:"type,omitempty"`
-	Options     []CreateOptioner `json:"options,omitempty"`
+	Name                      string           `json:"name,omitempty"`
+	Description               string           `json:"description,omitempty"`
+	Type                      CommandType      `json:"type,omitempty"`
+	Options                   []CreateOptioner `json:"options,omitempty"`
+	DefaultPermissionDisabled bool             `json:"default_permission"`
 }
 
-// CreateCommand is a slash command that can be registered to discord
-type SlashCommand struct {
-	Name        string           `json:"name,omitempty"`
-	Description string           `json:"description,omitempty"`
-	Type        CommandType      `json:"type,omitempty"`
-	Options     []CreateOptioner `json:"options,omitempty"`
+// MarshalJSON implements json.Marshaler
+func (c CreateCommand) MarshalJSON() ([]byte, error) {
+	type createCommand CreateCommand
+	return json.Marshal(struct {
+		createCommand
+		DefaultPermission bool `json:"default_permission"`
+	}{
+		createCommand:     createCommand(c),
+		DefaultPermission: !c.DefaultPermissionDisabled,
+	})
 }
 
 // NewSlashCommand returns a new slash command
