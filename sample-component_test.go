@@ -1,7 +1,6 @@
 package corde_test
 
 import (
-	"encoding/json"
 	"net/http/httptest"
 	"testing"
 
@@ -29,14 +28,8 @@ func TestComponentInteraction(t *testing.T) {
 	}
 
 	s := httptest.NewServer(mux.Handler())
-	respPost, err := owmock.NewWithClient(s.URL, s.Client()).Post(SampleComponent)
+	err := owmock.NewWithClient(s.URL, s.Client()).PostExpect(t, SampleComponent, expect)
 	assert.NoErr(err)
-
-	respV := &owmock.InteractionResponse{}
-	err = json.Unmarshal(respPost, respV)
-	assert.NoErr(err)
-
-	assert.Equal(expect, respV)
 }
 
 const SampleComponent = `{

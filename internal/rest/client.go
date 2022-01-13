@@ -5,7 +5,9 @@ import (
 	"net/http"
 )
 
-func DoJson(c *http.Client, r *http.Request, v any) (*http.Response, error) {
+// DoJSON executes a request and decodes the response into the given interface
+// It already calls `Close()` on the body
+func DoJSON(c *http.Client, r *http.Request, v any) (*http.Response, error) {
 	resp, err := c.Do(r)
 	if err != nil {
 		return nil, err
@@ -17,4 +19,10 @@ func DoJson(c *http.Client, r *http.Request, v any) (*http.Response, error) {
 	}
 
 	return resp, nil
+}
+
+func ContentType(contentType string) func(*http.Request) {
+	return func(r *http.Request) {
+		r.Header.Set("content-type", contentType)
+	}
 }

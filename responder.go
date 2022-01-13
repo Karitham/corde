@@ -74,7 +74,8 @@ func (r *Responder) respond(i intResponse) {
 	mw := multipart.NewWriter(r.w)
 	defer mw.Close()
 
-	r.w.Header().Set("Content-Type", mw.FormDataContentType())
+	contentType := mw.FormDataContentType()
+	r.w.Header().Set("content-type", contentType)
 	mw.WriteField("payload_json", payloadJSON.String())
 
 	for i, f := range i.Data.Attachments {

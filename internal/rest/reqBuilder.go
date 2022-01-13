@@ -16,7 +16,7 @@ type Request struct {
 	body io.Reader
 }
 
-var API = "https://discord.com/api/v8"
+var API = "https://discord.com/api/v9"
 
 func Req(paths ...any) *Request {
 	r := &Request{
@@ -67,6 +67,10 @@ func (r *Request) Get(opts ...func(*http.Request)) *http.Request {
 
 func (r *Request) Delete(opts ...func(*http.Request)) *http.Request {
 	return r.new(http.MethodDelete, r.body, opts...)
+}
+
+func (r *Request) Patch(opts ...func(*http.Request)) *http.Request {
+	return r.new(http.MethodPatch, r.body, opts...)
 }
 
 func JSON(r *http.Request) {
