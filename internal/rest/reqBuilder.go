@@ -50,7 +50,6 @@ func (r *Request) Append(v ...any) *Request {
 	for _, val := range v {
 		r.path = path.Join(r.path, fmt.Sprint(val))
 	}
-	r.path = path.Clean(r.path)
 	return r
 }
 
