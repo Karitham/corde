@@ -16,7 +16,7 @@ type Request struct {
 	body io.Reader
 }
 
-var API = "https://discord.com/api/v8"
+var API = "https://discord.com/api/v9"
 
 func Req(paths ...any) *Request {
 	r := &Request{
