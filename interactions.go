@@ -277,16 +277,16 @@ type Resolved struct {
 // OptionsInteractions is the options for an Interaction
 type OptionsInteractions map[string]JsonRaw
 
+type subRoute struct {
+	Name    string     `json:"name"`
+	Value   JsonRaw    `json:"value"`
+	Type    OptionType `json:"type"`
+	Options []subRoute `json:"options"`
+}
+
 // UnmarshalJSON implements json.Unmarshaler
 func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
-	type opt struct {
-		Name    string     `json:"name"`
-		Value   JsonRaw    `json:"value"`
-		Type    OptionType `json:"type"`
-		Options []opt      `json:"options"`
-	}
-
-	var opts []opt
+	var opts []subRoute
 	if err := json.Unmarshal(b, &opts); err != nil {
 		return err
 	}
@@ -294,8 +294,22 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	// max is 3 deep, as per discord's docs
 	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
+		// enables us to route easily
+		if opt.Type == OPTION_SUB_COMMAND || opt.Type == OPTION_SUB_COMMAND_GROUP {
+			if b, err := json.Marshal(opt); err == nil {
+				opt.Value = b
+			}
+		}
+
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
+			// enables us to route easily
+			if opt2.Type == OPTION_SUB_COMMAND {
+				if b, err := json.Marshal(opt2); err == nil {
+					opt2.Value = b
+				}
+			}
+
 			m[opt2.Name] = opt2.Value
 			for _, opt3 := range opt2.Options {
 				m[opt3.Name] = opt3.Value

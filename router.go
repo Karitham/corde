@@ -193,23 +193,22 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 		}
 	case INTERACTION_TYPE_APPLICATION_COMMAND:
 		// for menu & app commands, which can have spaces
-		path := strings.ReplaceAll(i.Data.Name, " ", "/")
-		if _, h, ok := m.routes.command.LongestPrefix(path); ok {
+		i.Data.Name = path.Join(strings.Fields(i.Data.Name)...)
+		if _, h, ok := m.routes.command.LongestPrefix(i.Data.Name); ok {
 			(*h)(r, i)
 			return
 		}
-		for optName, optV := range i.Data.Options {
-			// Subcommands cannot have values :)
-			if optV != nil {
+
+		for _, o := range i.Data.Options {
+			s := &subRoute{}
+			if err := o.UnmarshalTo(s); err != nil || (s.Type != OPTION_SUB_COMMAND_GROUP && s.Type != OPTION_SUB_COMMAND) {
 				continue
 			}
+			delete(i.Data.Options, s.Name)
 
-			nr := i.Data.Name + "/" + optName
-			if _, h, ok := m.routes.command.LongestPrefix(nr); ok {
-				i.Data.Name = nr
-				(*h)(r, i)
-				return
-			}
+			newI := *i
+			newI.Data.Name = path.Join(newI.Data.Name, s.Name)
+			m.routeReq(r, &newI)
 		}
 	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
 		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
@@ -217,18 +216,16 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 			return
 		}
 
-		for optName, optV := range i.Data.Options {
-			// Subcommands cannot have values :)
-			if optV != nil {
+		for _, o := range i.Data.Options {
+			s := &subRoute{}
+			if err := o.UnmarshalTo(s); err != nil || (s.Type != OPTION_SUB_COMMAND_GROUP && s.Type != OPTION_SUB_COMMAND) {
 				continue
 			}
+			delete(i.Data.Options, s.Name)
 
-			nr := i.Data.Name + "/" + optName
-			if _, h, ok := m.routes.autocomplete.LongestPrefix(nr); ok {
-				i.Data.Name = nr
-				(*h)(r, i)
-				return
-			}
+			newI := *i
+			newI.Data.Name = path.Join(newI.Data.Name, s.Name)
+			m.routeReq(r, &newI)
 		}
 	}
 	m.OnNotFound(r, i)
