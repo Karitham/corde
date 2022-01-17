@@ -277,16 +277,16 @@ type Resolved struct {
 // OptionsInteractions is the options for an Interaction
 type OptionsInteractions map[string]JsonRaw
 
-type subRoute struct {
-	Name    string     `json:"name"`
-	Value   JsonRaw    `json:"value"`
-	Type    OptionType `json:"type"`
-	Options []subRoute `json:"options"`
-}
-
 // UnmarshalJSON implements json.Unmarshaler
 func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
-	var opts []subRoute
+	type opt struct {
+		Name    string     `json:"name"`
+		Value   JsonRaw    `json:"value"`
+		Type    OptionType `json:"type"`
+		Options []opt      `json:"options"`
+	}
+
+	var opts []opt
 	if err := json.Unmarshal(b, &opts); err != nil {
 		return err
 	}
