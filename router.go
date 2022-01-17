@@ -199,16 +199,12 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 			return
 		}
 
-		for _, o := range i.Data.Options {
-			s := &subRoute{}
-			if err := o.UnmarshalTo(s); err != nil || (s.Type != OPTION_SUB_COMMAND_GROUP && s.Type != OPTION_SUB_COMMAND) {
-				continue
-			}
-			delete(i.Data.Options, s.Name)
-
-			newI := *i
-			newI.Data.Name = path.Join(newI.Data.Name, s.Name)
-			m.routeReq(r, &newI)
+		group := i.Data.Options["$group"]
+		cmd := i.Data.Options["$command"]
+		i.Data.Name = path.Join(i.Data.Name, group.String(), cmd.String())
+		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
+			(*h)(r, i)
+			return
 		}
 	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
 		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
@@ -216,16 +212,12 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 			return
 		}
 
-		for _, o := range i.Data.Options {
-			s := &subRoute{}
-			if err := o.UnmarshalTo(s); err != nil || (s.Type != OPTION_SUB_COMMAND_GROUP && s.Type != OPTION_SUB_COMMAND) {
-				continue
-			}
-			delete(i.Data.Options, s.Name)
-
-			newI := *i
-			newI.Data.Name = path.Join(newI.Data.Name, s.Name)
-			m.routeReq(r, &newI)
+		group := i.Data.Options["$group"]
+		cmd := i.Data.Options["$command"]
+		i.Data.Name = path.Join(i.Data.Name, group.String(), cmd.String())
+		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
+			(*h)(r, i)
+			return
 		}
 	}
 	m.OnNotFound(r, i)

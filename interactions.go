@@ -295,19 +295,21 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
 		// enables us to route easily
-		if opt.Type == OPTION_SUB_COMMAND || opt.Type == OPTION_SUB_COMMAND_GROUP {
-			if b, err := json.Marshal(opt); err == nil {
-				opt.Value = b
-			}
+		switch opt.Type {
+		case OPTION_SUB_COMMAND_GROUP:
+			opt.Value = []byte(opt.Name)
+			opt.Name = "$group"
+		case OPTION_SUB_COMMAND:
+			opt.Value = []byte(opt.Name)
+			opt.Name = "$command"
 		}
 
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
 			// enables us to route easily
 			if opt2.Type == OPTION_SUB_COMMAND {
-				if b, err := json.Marshal(opt2); err == nil {
-					opt2.Value = b
-				}
+				opt2.Value = []byte(opt2.Name)
+				opt2.Name = "$command"
 			}
 
 			m[opt2.Name] = opt2.Value
