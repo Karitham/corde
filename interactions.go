@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+const (
+	// RouteInteractionSubcommandGroup represents the map key for a subcommand group route
+	RouteInteractionSubcommandGroup = "$group"
+	// RouteInteractionSubcommand reprensents the map key for a subcommand route
+	RouteInteractionSubcommand = "$command"
+)
+
 // InteractionType is the type of interaction
 type InteractionType int
 
@@ -298,10 +305,10 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 		switch opt.Type {
 		case OPTION_SUB_COMMAND_GROUP:
 			opt.Value = []byte(opt.Name)
-			opt.Name = "$group"
+			opt.Name = RouteInteractionSubcommandGroup
 		case OPTION_SUB_COMMAND:
 			opt.Value = []byte(opt.Name)
-			opt.Name = "$command"
+			opt.Name = RouteInteractionSubcommand
 		}
 
 		m[opt.Name] = opt.Value
@@ -309,7 +316,7 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 			// enables us to route easily
 			if opt2.Type == OPTION_SUB_COMMAND {
 				opt2.Value = []byte(opt2.Name)
-				opt2.Name = "$command"
+				opt2.Name = RouteInteractionSubcommand
 			}
 
 			m[opt2.Name] = opt2.Value

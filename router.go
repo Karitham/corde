@@ -195,16 +195,16 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 		// for menu & app commands, which can have spaces
 		i.Data.Name = path.Join(strings.Fields(i.Data.Name)...)
 
-		group := i.Data.Options["$group"]
-		cmd := i.Data.Options["$command"]
+		group := i.Data.Options[RouteInteractionSubcommandGroup]
+		cmd := i.Data.Options[RouteInteractionSubcommand]
 		i.Data.Name = path.Join(i.Data.Name, group.String(), cmd.String())
 		if _, h, ok := m.routes.command.LongestPrefix(i.Data.Name); ok {
 			(*h)(r, i)
 			return
 		}
 	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
-		group := i.Data.Options["$group"]
-		cmd := i.Data.Options["$command"]
+		group := i.Data.Options[RouteInteractionSubcommandGroup]
+		cmd := i.Data.Options[RouteInteractionSubcommand]
 		i.Data.Name = path.Join(i.Data.Name, group.String(), cmd.String())
 		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
 			(*h)(r, i)
