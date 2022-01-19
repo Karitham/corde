@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+const (
+	// RouteInteractionSubcommandGroup represents the map key for a subcommand group route
+	RouteInteractionSubcommandGroup = "$group"
+	// RouteInteractionSubcommand reprensents the map key for a subcommand route
+	RouteInteractionSubcommand = "$command"
+)
+
 // InteractionType is the type of interaction
 type InteractionType int
 
@@ -294,8 +301,24 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	// max is 3 deep, as per discord's docs
 	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
+		// enables us to route easily
+		switch opt.Type {
+		case OPTION_SUB_COMMAND_GROUP:
+			opt.Value = []byte(opt.Name)
+			opt.Name = RouteInteractionSubcommandGroup
+		case OPTION_SUB_COMMAND:
+			opt.Value = []byte(opt.Name)
+			opt.Name = RouteInteractionSubcommand
+		}
+
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
+			// enables us to route easily
+			if opt2.Type == OPTION_SUB_COMMAND {
+				opt2.Value = []byte(opt2.Name)
+				opt2.Name = RouteInteractionSubcommand
+			}
+
 			m[opt2.Name] = opt2.Value
 			for _, opt3 := range opt2.Options {
 				m[opt3.Name] = opt3.Value
