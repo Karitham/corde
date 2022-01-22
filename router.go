@@ -32,7 +32,7 @@ type Mux struct {
 	AppID      Snowflake
 	BotToken   string
 
-	http.Handler
+	handler http.Handler
 }
 
 // Lock the mux, to be able to mount or unmount routes
@@ -132,7 +132,7 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		BotToken: botToken,
 	}
 
-	m.Handler = rest.Verify(publicKey)(http.HandlerFunc(m.route))
+	m.handler = rest.Verify(publicKey)(http.HandlerFunc(m.route))
 	return m
 }
 
@@ -162,6 +162,10 @@ func (m *Mux) ListenAndServe(addr string) error {
 	r.Handle(m.BasePath, m)
 
 	return http.ListenAndServe(addr, r)
+}
+
+func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request){ 
+	m.handler.ServeHTTP(w, r)
 }
 
 
