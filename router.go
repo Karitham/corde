@@ -164,6 +164,7 @@ func (m *Mux) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, r)
 }
 
+// ServeHTTP will serve HTTP requests with discord public key validation 
 func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request){ 
 	m.handler.ServeHTTP(w, r)
 }
