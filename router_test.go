@@ -1,8 +1,10 @@
 package corde
 
 import (
-	"github.com/matryer/is"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/matryer/is"
 )
 
 func TestRoute(t *testing.T) {
@@ -38,4 +40,9 @@ func TestRoute(t *testing.T) {
 	}
 
 	assert.Equal(commands, []string{"foo/bar/baz"}) // There should only be a single command on the router
+}
+
+func TestServeHTTP(t *testing.T) {
+	m := NewMux("", Snowflake(0), "")
+	httptest.NewServer(m)
 }

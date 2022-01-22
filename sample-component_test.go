@@ -27,7 +27,7 @@ func TestComponentInteraction(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(mux.Handler())
+	s := httptest.NewServer(mux)
 	err := owmock.NewWithClient(s.URL, s.Client()).PostExpect(t, SampleComponent, expect)
 	assert.NoErr(err)
 }
