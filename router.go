@@ -31,6 +31,8 @@ type Mux struct {
 	Client     *http.Client
 	AppID      Snowflake
 	BotToken   string
+
+	http.Handler
 }
 
 // Lock the mux, to be able to mount or unmount routes
@@ -105,7 +107,8 @@ func (m *Mux) Route(pattern string, fn func(m *Mux)) {
 // When you mount a command on the mux, it's prefix based routed,
 // which means you can route to a button like `/list/next/456132153` having mounted `/list/next`
 func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
-	return &Mux{
+
+	m := &Mux{
 		rMu: &sync.RWMutex{},
 		routes: routes{
 			command:      radix.New[Handler](),
@@ -128,6 +131,9 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		AppID:    appID,
 		BotToken: botToken,
 	}
+
+	m.Handler = rest.Verify(publicKey)(http.HandlerFunc(m.route))
+	return m
 }
 
 // Handler handles incoming requests
@@ -158,17 +164,6 @@ func (m *Mux) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, r)
 }
 
-// ServeHTTP will serve HTTP
-func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) { 
-	validator := rest.Verify(m.PublicKey)
-	validator(http.HandlerFunc(m.route)).ServeHTTP(w, r)
-}
-
-// Handler returns an http.Handler for the mux
-func (m *Mux) Handler() http.Handler {
-	validator := rest.Verify(m.PublicKey)
-	return validator(http.HandlerFunc(m.route))
-}
 
 // route handles routing the requests
 func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
