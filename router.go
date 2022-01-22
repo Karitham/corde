@@ -153,9 +153,15 @@ type InteractionRequest struct {
 // ListenAndServe starts the gateway listening to events
 func (m *Mux) ListenAndServe(addr string) error {
 	r := http.NewServeMux()
-	r.Handle(m.BasePath, m.Handler())
+	r.Handle(m.BasePath, m)
 
 	return http.ListenAndServe(addr, r)
+}
+
+// ServeHTTP will serve HTTP
+func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) { 
+	validator := rest.Verify(m.PublicKey)
+	validator(http.HandlerFunc(m.route)).ServeHTTP(w, r)
 }
 
 // Handler returns an http.Handler for the mux
