@@ -45,7 +45,7 @@ func main() {
 		m.Command("list", t.listHandler)
 		m.Route("rm", func(m *corde.Mux) {
 			m.Command("", t.removeHandler)
-			m.Autocomplete("", t.autoCompleteNames)
+			m.Autocomplete("name", t.autoCompleteNames)
 		})
 	})
 
