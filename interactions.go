@@ -310,14 +310,11 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 		// enables us to route easily
 		switch {
 		case OPTION_SUB_COMMAND_GROUP == opt.Type:
-			opt.Value = []byte(opt.Name)
-			opt.Name = RouteInteractionSubcommandGroup
+			m[RouteInteractionSubcommandGroup] = []byte(opt.Name)
 		case OPTION_SUB_COMMAND == opt.Type:
-			opt.Value = []byte(opt.Name)
-			opt.Name = RouteInteractionSubcommand
+			m[RouteInteractionSubcommand] = []byte(opt.Name)
 		case opt.Focused:
-			opt.Value = []byte(opt.Name)
-			opt.Name = RouteInteractionFocused
+			m[RouteInteractionFocused] = []byte(opt.Name)
 		}
 
 		m[opt.Name] = opt.Value
@@ -325,18 +322,15 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 			// enables us to route easily
 			switch {
 			case OPTION_SUB_COMMAND == opt2.Type:
-				opt2.Value = []byte(opt2.Name)
-				opt2.Name = RouteInteractionSubcommand
+				m[RouteInteractionSubcommand] = []byte(opt2.Name)
 			case opt2.Focused:
-				opt2.Value = []byte(opt2.Name)
-				opt2.Name = RouteInteractionFocused
+				m[RouteInteractionFocused] = []byte(opt2.Name)
 			}
 
 			m[opt2.Name] = opt2.Value
 			for _, opt3 := range opt2.Options {
 				if opt3.Focused {
-					opt3.Value = []byte(opt3.Name)
-					opt3.Name = RouteInteractionFocused
+					m[RouteInteractionFocused] = []byte(opt3.Name)
 				}
 				m[opt3.Name] = opt3.Value
 			}
