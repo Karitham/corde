@@ -12,6 +12,11 @@ const (
 	RouteInteractionSubcommandGroup = "$group"
 	// RouteInteractionSubcommand reprensents the map key for a subcommand route
 	RouteInteractionSubcommand = "$command"
+
+	// RouteInteractionFocused represents the map key for a focused route.
+	// This is useful for autocomplete interactions so we can route on focused keys
+	// Such, we route on `$group/$command/$focused`,
+	RouteInteractionFocused = "$focused"
 )
 
 // InteractionType is the type of interaction
@@ -291,6 +296,7 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 		Value   JsonRaw    `json:"value"`
 		Type    OptionType `json:"type"`
 		Options []opt      `json:"options"`
+		Focused bool       `json:"focused"`
 	}
 
 	var opts []opt
@@ -301,26 +307,32 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	// max is 3 deep, as per discord's docs
 	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
-		// enables us to route easily
-		switch opt.Type {
-		case OPTION_SUB_COMMAND_GROUP:
+		switch {
+		case OPTION_SUB_COMMAND_GROUP == opt.Type:
 			opt.Value = []byte(opt.Name)
 			opt.Name = RouteInteractionSubcommandGroup
-		case OPTION_SUB_COMMAND:
+		case OPTION_SUB_COMMAND == opt.Type:
 			opt.Value = []byte(opt.Name)
 			opt.Name = RouteInteractionSubcommand
+		case opt.Focused:
+			m[RouteInteractionFocused] = []byte(opt.Name)
 		}
 
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
-			// enables us to route easily
-			if opt2.Type == OPTION_SUB_COMMAND {
+			switch {
+			case OPTION_SUB_COMMAND == opt2.Type:
 				opt2.Value = []byte(opt2.Name)
 				opt2.Name = RouteInteractionSubcommand
+			case opt2.Focused:
+				m[RouteInteractionFocused] = []byte(opt2.Name)
 			}
 
 			m[opt2.Name] = opt2.Value
 			for _, opt3 := range opt2.Options {
+				if opt3.Focused {
+					m[RouteInteractionFocused] = []byte(opt3.Name)
+				}
 				m[opt3.Name] = opt3.Value
 			}
 		}
