@@ -307,22 +307,23 @@ func (o *OptionsInteractions) UnmarshalJSON(b []byte) error {
 	// max is 3 deep, as per discord's docs
 	m := make(map[string]JsonRaw)
 	for _, opt := range opts {
-		// enables us to route easily
 		switch {
 		case OPTION_SUB_COMMAND_GROUP == opt.Type:
-			m[RouteInteractionSubcommandGroup] = []byte(opt.Name)
+			opt.Value = []byte(opt.Name)
+			opt.Name = RouteInteractionSubcommandGroup
 		case OPTION_SUB_COMMAND == opt.Type:
-			m[RouteInteractionSubcommand] = []byte(opt.Name)
+			opt.Value = []byte(opt.Name)
+			opt.Name = RouteInteractionSubcommand
 		case opt.Focused:
 			m[RouteInteractionFocused] = []byte(opt.Name)
 		}
 
 		m[opt.Name] = opt.Value
 		for _, opt2 := range opt.Options {
-			// enables us to route easily
 			switch {
 			case OPTION_SUB_COMMAND == opt2.Type:
-				m[RouteInteractionSubcommand] = []byte(opt2.Name)
+				opt2.Value = []byte(opt2.Name)
+				opt2.Name = RouteInteractionSubcommand
 			case opt2.Focused:
 				m[RouteInteractionFocused] = []byte(opt2.Name)
 			}
