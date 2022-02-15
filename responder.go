@@ -7,6 +7,9 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+
+	"github.com/Karitham/corde/components"
+	"github.com/Karitham/corde/snowflake"
 )
 
 // Responder loosely maps to the discord gateway response
@@ -17,14 +20,14 @@ type Responder struct {
 
 // InteractionResponder returns InteractionRespData
 type InteractionResponder interface {
-	InteractionRespData() *InteractionRespData
+	InteractionRespData() *components.InteractionRespData
 }
 
 var _ ResponseWriter = &Responder{}
 
 type intResponse struct {
-	Type int                  `json:"type"`
-	Data *InteractionRespData `json:"data,omitempty"`
+	Type int                             `json:"type"`
+	Data *components.InteractionRespData `json:"data,omitempty"`
 }
 
 // Pong responds to pings on the gateway
@@ -80,7 +83,7 @@ func (r *Responder) respond(i intResponse) {
 
 	for i, f := range i.Data.Attachments {
 		if f.ID == 0 {
-			f.ID = Snowflake(i)
+			f.ID = snowflake.Snowflake(i)
 		}
 
 		ff, CFerr := mw.CreateFormFile(fmt.Sprintf("files[%d]", i), f.Filename)

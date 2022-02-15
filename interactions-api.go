@@ -7,11 +7,13 @@ import (
 	"io"
 	"mime/multipart"
 
+	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/internal/rest"
+	"github.com/Karitham/corde/snowflake"
 )
 
 // returns the body and its content-type
-func toBody(i *InteractionRespData) (*bytes.Buffer, string) {
+func toBody(i *components.InteractionRespData) (*bytes.Buffer, string) {
 	body := new(bytes.Buffer)
 	contentType := "application/json"
 
@@ -34,7 +36,7 @@ func toBody(i *InteractionRespData) (*bytes.Buffer, string) {
 
 	for i, f := range i.Attachments {
 		if f.ID == 0 {
-			f.ID = Snowflake(i)
+			f.ID = snowflake.Snowflake(i)
 		}
 
 		ff, CFerr := mw.CreateFormFile(fmt.Sprintf("files[%d]", i), f.Filename)
@@ -52,8 +54,8 @@ func toBody(i *InteractionRespData) (*bytes.Buffer, string) {
 // GetOriginalInteraction returns the original response to an Interaction
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
-func (m *Mux) GetOriginalInteraction(token string) (*InteractionRespData, error) {
-	data := &InteractionRespData{}
+func (m *Mux) GetOriginalInteraction(token string) (*components.InteractionRespData, error) {
+	data := &components.InteractionRespData{}
 	_, err := rest.DoJSON(m.Client, rest.Req("/webhooks", m.AppID, token, "messages/@original").Get(m.authorize), data)
 	if err != nil {
 		return nil, err
@@ -112,8 +114,8 @@ func (m *Mux) FollowUpInteraction(token string, data InteractionResponder) error
 // GetFollowUpInteraction returns the response to a FollowUpInteraction
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
-func (m *Mux) GetFollowUpInteraction(token string, messageID Snowflake) (*InteractionRespData, error) {
-	data := &InteractionRespData{}
+func (m *Mux) GetFollowUpInteraction(token string, messageID snowflake.Snowflake) (*components.InteractionRespData, error) {
+	data := &components.InteractionRespData{}
 	_, err := rest.DoJSON(m.Client, rest.Req("/webhooks", m.AppID, token, "messages", messageID).Get(m.authorize), data)
 	if err != nil {
 		return nil, err
@@ -125,7 +127,7 @@ func (m *Mux) GetFollowUpInteraction(token string, messageID Snowflake) (*Intera
 // EditFollowUpInteraction to edit a response to a FollowUpInteraction
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
-func (m *Mux) EditFollowUpInteraction(token string, messageID Snowflake, data InteractionResponder) error {
+func (m *Mux) EditFollowUpInteraction(token string, messageID snowflake.Snowflake, data InteractionResponder) error {
 	body, contentType := toBody(data.InteractionRespData())
 
 	_, err := m.Client.Do(
@@ -141,7 +143,7 @@ func (m *Mux) EditFollowUpInteraction(token string, messageID Snowflake, data In
 // DeleteFollowUpInteraction to delete a response to a FollowUpInteraction
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#delete-followup-message
-func (m *Mux) DeleteFollowUpInteraction(token string, messageID Snowflake) error {
+func (m *Mux) DeleteFollowUpInteraction(token string, messageID snowflake.Snowflake) error {
 	_, err := m.Client.Do(
 		rest.Req("/webhooks", m.AppID, token, "messages", messageID).
 			Delete(m.authorize),

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Karitham/corde"
+	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/owmock"
 	"github.com/matryer/is"
 )
@@ -15,14 +16,14 @@ func TestComponentInteraction(t *testing.T) {
 	mux := corde.NewMux(pub, 0, "")
 
 	mux.Button("click_one", func(w corde.ResponseWriter, _ *corde.InteractionRequest) {
-		w.Respond(&corde.InteractionRespData{
+		w.Respond(&components.InteractionRespData{
 			Content: "Hello World!",
 		})
 	})
 
 	expect := &owmock.InteractionResponse{
 		Type: 4,
-		Data: corde.InteractionRespData{
+		Data: components.InteractionRespData{
 			Content: "Hello World!",
 		},
 	}

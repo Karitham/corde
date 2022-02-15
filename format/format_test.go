@@ -5,14 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Karitham/corde"
-
+	"github.com/Karitham/corde/snowflake"
 	"github.com/matryer/is"
 )
 
 const testIDString = "1234567890"
 
-var testIDSnowflake = corde.SnowflakeFromString(testIDString)
+var testIDSnowflake = snowflake.SnowflakeFromString(testIDString)
 
 type testcase[T ID] struct {
 	Name     string
@@ -67,38 +66,38 @@ func TestFormatString(t *testing.T) {
 	}
 }
 
-func TestFormatSnowflake(t *testing.T) {
-	tt := []testcase[corde.Snowflake]{
+func TestFormatsSnowflake(t *testing.T) {
+	tt := []testcase[snowflake.Snowflake]{
 		{
 			Name:     "User",
-			Fmt:      User[corde.Snowflake],
+			Fmt:      User[snowflake.Snowflake],
 			Expected: fmt.Sprintf("<@%s>", testIDString),
 		},
 		{
 			Name:     "UserNick",
-			Fmt:      UserNick[corde.Snowflake],
+			Fmt:      UserNick[snowflake.Snowflake],
 			Expected: fmt.Sprintf("<@!%s>", testIDString),
 		},
 		{
 			Name:     "Channel",
-			Fmt:      Channel[corde.Snowflake],
+			Fmt:      Channel[snowflake.Snowflake],
 			Expected: fmt.Sprintf("<#%s>", testIDString),
 		},
 		{
 			Name:     "Role",
-			Fmt:      Role[corde.Snowflake],
+			Fmt:      Role[snowflake.Snowflake],
 			Expected: fmt.Sprintf("<@&%s>", testIDString),
 		},
 		{
 			Name: "Emoji",
-			Fmt: func(s corde.Snowflake) string {
+			Fmt: func(s snowflake.Snowflake) string {
 				return Emoji("test", s)
 			},
 			Expected: fmt.Sprintf("<:test:%s>", testIDString),
 		},
 		{
 			Name: "AnimatedEmoji",
-			Fmt: func(s corde.Snowflake) string {
+			Fmt: func(s snowflake.Snowflake) string {
 				return AnimatedEmoji("test", s)
 			},
 			Expected: fmt.Sprintf("<a:test:%s>", testIDString),

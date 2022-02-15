@@ -1,6 +1,10 @@
 package corde
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/Karitham/corde/components"
+)
 
 // CreateCommander is a command that can be registered
 type CreateCommander interface {
@@ -14,16 +18,16 @@ type CreateOptioner interface {
 
 // CreateOption is the base option type for creating any sort of option
 type CreateOption struct {
-	Name         string           `json:"name"`
-	Type         OptionType       `json:"type"`
-	Description  string           `json:"description,omitempty"`
-	Required     bool             `json:"required,omitempty"`
-	Choices      []Choice[any]    `json:"choices,omitempty"`
-	Options      []CreateOptioner `json:"options,omitempty"`
-	ChannelTypes []ChannelType    `json:"channel_types,omitempty"`
-	MinValue     float64          `json:"min_value,omitempty"`
-	MaxValue     float64          `json:"max_value,omitempty"`
-	Autocomplete bool             `json:"autocomplete,omitempty"`
+	Name         string                   `json:"name"`
+	Type         components.OptionType    `json:"type"`
+	Description  string                   `json:"description,omitempty"`
+	Required     bool                     `json:"required,omitempty"`
+	Choices      []components.Choice[any] `json:"choices,omitempty"`
+	Options      []CreateOptioner         `json:"options,omitempty"`
+	ChannelTypes []components.ChannelType `json:"channel_types,omitempty"`
+	MinValue     float64                  `json:"min_value,omitempty"`
+	MaxValue     float64                  `json:"max_value,omitempty"`
+	Autocomplete bool                     `json:"autocomplete,omitempty"`
 }
 
 func (c CreateOption) createOption() CreateOption {
@@ -32,11 +36,11 @@ func (c CreateOption) createOption() CreateOption {
 
 // CreateCommand is a slash command that can be registered to discord
 type CreateCommand struct {
-	Name                      string           `json:"name,omitempty"`
-	Description               string           `json:"description,omitempty"`
-	Type                      CommandType      `json:"type,omitempty"`
-	Options                   []CreateOptioner `json:"options,omitempty"`
-	DefaultPermissionDisabled bool             `json:"default_permission"`
+	Name                      string                 `json:"name,omitempty"`
+	Description               string                 `json:"description,omitempty"`
+	Type                      components.CommandType `json:"type,omitempty"`
+	Options                   []CreateOptioner       `json:"options,omitempty"`
+	DefaultPermissionDisabled bool                   `json:"default_permission"`
 }
 
 // MarshalJSON implements json.Marshaler
@@ -57,7 +61,7 @@ func NewSlashCommand(name string, description string, options ...CreateOptioner)
 		Name:        name,
 		Description: description,
 		Options:     options,
-		Type:        COMMAND_CHAT_INPUT,
+		Type:        components.COMMAND_CHAT_INPUT,
 	}
 }
 
@@ -65,7 +69,7 @@ func NewSlashCommand(name string, description string, options ...CreateOptioner)
 func NewUserCommand(name string) CreateCommand {
 	return CreateCommand{
 		Name: name,
-		Type: COMMAND_USER,
+		Type: components.COMMAND_USER,
 	}
 }
 
@@ -73,7 +77,7 @@ func NewUserCommand(name string) CreateCommand {
 func NewMessageCommand(name string) CreateCommand {
 	return CreateCommand{
 		Name: name,
-		Type: COMMAND_MESSAGE,
+		Type: components.COMMAND_MESSAGE,
 	}
 }
 
@@ -107,7 +111,7 @@ func (o *SubcommandOption) createOption() CreateOption {
 		Options:     o.Options,
 		Name:        o.Name,
 		Description: o.Description,
-		Type:        OPTION_SUB_COMMAND,
+		Type:        components.OPTION_SUB_COMMAND,
 	}
 }
 
@@ -136,7 +140,7 @@ func (o *SubcommandGroupOption) createOption() CreateOption {
 		Options:     o.Options,
 		Name:        o.Name,
 		Description: o.Description,
-		Type:        OPTION_SUB_COMMAND_GROUP,
+		Type:        components.OPTION_SUB_COMMAND_GROUP,
 	}
 }
 

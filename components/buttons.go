@@ -1,4 +1,6 @@
-package corde
+package components
+
+import "github.com/Karitham/corde/snowflake"
 
 // ButtonStyle is the style of a button Component
 type ButtonStyle int
@@ -63,12 +65,12 @@ type Button struct {
 // Emoji
 // https://discord.com/developers/docs/resources/emoji#emoji-object
 type Emoji struct {
-	ID            Snowflake   `json:"id,omitempty"`
-	Name          string      `json:"name"`
-	Roles         []Snowflake `json:"roles,omitempty"`
-	User          User        `json:"user,omitempty"`
-	RequireColons bool        `json:"require_colons,omitempty"`
-	Managed       bool        `json:"managed,omitempty"`
-	Animated      bool        `json:"animated,omitempty"`
-	Available     bool        `json:"available,omitempty"`
+	ID            snowflake.Snowflake   `json:"id,omitempty"`
+	Name          string                `json:"name"`
+	Roles         []snowflake.Snowflake `json:"roles,omitempty"`
+	User          User                  `json:"user,omitempty"`
+	RequireColons bool                  `json:"require_colons,omitempty"`
+	Managed       bool                  `json:"managed,omitempty"`
+	Animated      bool                  `json:"animated,omitempty"`
+	Available     bool                  `json:"available,omitempty"`
 }

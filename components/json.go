@@ -1,4 +1,4 @@
-package corde
+package components
 
 import (
 	"encoding/json"

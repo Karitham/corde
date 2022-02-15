@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/Karitham/corde"
+	"github.com/Karitham/corde/components"
+	"github.com/Karitham/corde/snowflake"
 )
 
 // spaces are routed as `/`
@@ -22,7 +24,7 @@ func main() {
 	if token == "" {
 		log.Fatalln("DISCORD_BOT_TOKEN not set")
 	}
-	appID := corde.SnowflakeFromString(os.Getenv("DISCORD_APP_ID"))
+	appID := snowflake.SnowflakeFromString(os.Getenv("DISCORD_APP_ID"))
 	if appID == 0 {
 		log.Fatalln("DISCORD_APP_ID not set")
 	}
@@ -30,7 +32,7 @@ func main() {
 	if pk == "" {
 		log.Fatalln("DISCORD_PUBLIC_KEY not set")
 	}
-	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
+	g := corde.GuildOpt(snowflake.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	m := corde.NewMux(pk, appID, token)
 
 	// user
@@ -50,36 +52,38 @@ func main() {
 }
 
 func NFTuser(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	user := i.Data.Resolved.Users.First()
+	data, _ := components.GetInteractionData[components.UserCommandInteractionData](i.Interaction)
+	user := data.Resolved.Users.First()
 	url := user.AvatarURL()
-	username := user.Username
 
 	if url == "" {
-		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", username).Ephemeral())
+		w.Respond(components.NewResp().Contentf("error getting %s's profile pic", user.Username).Ephemeral())
 		return
 	}
 
 	resp, err := http.Get(url)
 	if err != nil {
-		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", username).Ephemeral())
+		w.Respond(components.NewResp().Contentf("error getting %s's profile pic", user.Username).Ephemeral())
 		return
 	}
 	defer resp.Body.Close()
 
 	filename := filepath.Base(url)
-	w.Respond(corde.NewResp().
-		Contentf("Good job %s, you just minted %s's profile picture", i.User.Username, username).
+	w.Respond(components.NewResp().
+		Contentf("Good job %s, you just minted %s's profile picture", i.Member.User.Username, user.Username).
 		Attachment(resp.Body, filename),
 	)
 }
 
 func NFTmessage(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	msg := i.Data.Resolved.Messages.First()
+	data, _ := components.GetInteractionData[components.MessageCommandInteractionData](i.Interaction)
+
+	msg := data.Resolved.Messages.First()
 	chanID := msg.ChannelID
 	msgID := msg.ID
 
 	message := fmt.Sprintf("https://discordapp.com/channels/%d/%d/%d", i.GuildID, chanID, msgID)
-	w.Respond(corde.NewResp().
-		Contentf("Good job %s, you just minted this message, here's the link %s", i.User.Username, message),
+	w.Respond(components.NewResp().
+		Contentf("Good job %s, you just minted this message, here's the link %s", i.Member.User.Username, message),
 	)
 }

@@ -11,7 +11,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/internal/rest"
+	"github.com/Karitham/corde/snowflake"
 	radix "github.com/akrennmair/go-radix"
 )
 
@@ -29,7 +31,7 @@ type Mux struct {
 	BasePath   string // base route path, default is "/"
 	OnNotFound Handler
 	Client     *http.Client
-	AppID      Snowflake
+	AppID      snowflake.Snowflake
 	BotToken   string
 
 	handler http.Handler
@@ -46,16 +48,16 @@ func (m *Mux) Unlock() {
 }
 
 // Mount is for mounting a Handler on the Mux
-func (m *Mux) Mount(typ InteractionType, route string, handler Handler) {
+func (m *Mux) Mount(typ components.InteractionType, route string, handler Handler) {
 	m.rMu.Lock()
 	defer m.rMu.Unlock()
 
 	switch typ {
-	case INTERACTION_TYPE_APPLICATION_COMMAND:
+	case components.INTERACTION_TYPE_APPLICATION_COMMAND:
 		m.routes.command.Insert(route, &handler)
-	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
+	case components.INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
 		m.routes.autocomplete.Insert(route, &handler)
-	case INTERACTION_TYPE_MESSAGE_COMPONENT:
+	case components.INTERACTION_TYPE_MESSAGE_COMPONENT:
 		m.routes.component.Insert(route, &handler)
 	}
 }
@@ -106,7 +108,7 @@ func (m *Mux) Route(pattern string, fn func(m *Mux)) {
 //
 // When you mount a command on the mux, it's prefix based routed,
 // which means you can route to a button like `/list/next/456132153` having mounted `/list/next`
-func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
+func NewMux(publicKey string, appID snowflake.Snowflake, botToken string) *Mux {
 	m := &Mux{
 		rMu: &sync.RWMutex{},
 		routes: routes{
@@ -117,12 +119,7 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		PublicKey: publicKey,
 		BasePath:  "/",
 		OnNotFound: func(_ ResponseWriter, i *InteractionRequest) {
-			n := i.Data.Name
-			for r, o := range i.Data.Options {
-				n += fmt.Sprintf("/%s=%s", r, o.String())
-			}
-
-			log.Printf("No handler for registered command: %s\n", n)
+			log.Printf("No handler for registered command: %s\n", i.Route)
 		},
 		Client: &http.Client{
 			Timeout: 10 * time.Second,
@@ -151,7 +148,7 @@ type ResponseWriter interface {
 
 // InteractionRequest is an incoming request Interaction
 type InteractionRequest struct {
-	*Interaction
+	components.Interaction
 	Context context.Context
 }
 
@@ -187,31 +184,41 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest) {
 	m.rMu.RLock()
 	defer m.rMu.RUnlock()
 	switch i.Type {
-	case INTERACTION_TYPE_PING:
+	case components.INTERACTION_TYPE_PING:
 		r.Pong()
 		return
-	case INTERACTION_TYPE_MESSAGE_COMPONENT:
-		if _, h, ok := m.routes.component.LongestPrefix(i.Data.CustomID); ok {
+	case components.INTERACTION_TYPE_MESSAGE_COMPONENT:
+		data, _ := components.GetInteractionData[components.SelectInteractionData](i.Interaction)
+		i.Route = data.CustomID
+		if _, h, ok := m.routes.component.LongestPrefix(i.Route); ok {
 			(*h)(r, i)
 			return
 		}
-	case INTERACTION_TYPE_APPLICATION_COMMAND:
+	case components.INTERACTION_TYPE_APPLICATION_COMMAND:
 		// for menu & app commands, which can have spaces
-		i.Data.Name = path.Join(strings.Fields(i.Data.Name)...)
+		data, _ := components.GetInteractionData[components.SlashInteractionData](i.Interaction)
+		// not slash command
+		if data.Type != 1 {
+			data.Name = path.Join(strings.Fields(data.Name)...)
+		}
 
-		group := i.Data.Options[RouteInteractionSubcommandGroup]
-		cmd := i.Data.Options[RouteInteractionSubcommand]
-		i.Data.Name = path.Join(i.Data.Name, group.String(), cmd.String())
-		if _, h, ok := m.routes.command.LongestPrefix(i.Data.Name); ok {
+		group := data.Options[components.RouteInteractionSubcommandGroup]
+		cmd := data.Options[components.RouteInteractionSubcommand]
+		i.Route = path.Join(data.Name, group.String(), cmd.String())
+
+		if _, h, ok := m.routes.command.LongestPrefix(i.Route); ok {
 			(*h)(r, i)
 			return
 		}
-	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
-		group := i.Data.Options[RouteInteractionSubcommandGroup]
-		cmd := i.Data.Options[RouteInteractionSubcommand]
-		focused := i.Data.Options[RouteInteractionFocused]
-		i.Data.Name = path.Join(i.Data.Name, group.String(), cmd.String(), focused.String())
-		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Data.Name); ok {
+	case components.INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
+		data, _ := components.GetInteractionData[components.AutocompleteInteractionData](i.Interaction)
+
+		group := data.Options[components.RouteInteractionSubcommandGroup]
+		cmd := data.Options[components.RouteInteractionSubcommand]
+		focused := data.Options[components.RouteInteractionFocused]
+		i.Route = path.Join(data.Name, group.String(), cmd.String(), focused.String())
+
+		if _, h, ok := m.routes.autocomplete.LongestPrefix(i.Route); ok {
 			(*h)(r, i)
 			return
 		}

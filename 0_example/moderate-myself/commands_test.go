@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Karitham/corde"
+	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/owmock"
 )
 
@@ -25,7 +26,7 @@ func Test_list(t *testing.T) {
 					if data.Content != "Click on the buttons to move between existing commands and or delete them." {
 						t.Errorf("expected 'no todos' got %s", data.Content)
 					}
-					if data.Flags != corde.RESPONSE_FLAGS_EPHEMERAL {
+					if data.Flags != components.RESPONSE_FLAGS_EPHEMERAL {
 						t.Errorf("expected ephemeral flag got %d", data.Flags)
 					}
 				},
@@ -58,7 +59,7 @@ func Test_btnNext(t *testing.T) {
 						t.Error("expected some sort of response")
 					}
 
-					if data.Flags != corde.RESPONSE_FLAGS_EPHEMERAL {
+					if data.Flags != components.RESPONSE_FLAGS_EPHEMERAL {
 						t.Errorf("expected ephemeral flag got %d", data.Flags)
 					}
 				},

@@ -6,7 +6,9 @@ import (
 	"sync"
 
 	"github.com/Karitham/corde"
+	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/format"
+	"github.com/Karitham/corde/snowflake"
 )
 
 type todo struct {
@@ -15,7 +17,7 @@ type todo struct {
 }
 
 type todoItem struct {
-	user  corde.Snowflake
+	user  snowflake.Snowflake
 	value string
 }
 
@@ -24,11 +26,11 @@ func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.InteractionReq
 	defer t.mu.Unlock()
 
 	if len(t.list) == 0 {
-		w.Autocomplete(corde.NewResp())
+		w.Autocomplete(components.NewResp())
 		return
 	}
 
-	resp := corde.NewResp()
+	resp := components.NewResp()
 	for k := range t.list {
 		resp.Choice(k, k)
 	}
@@ -37,10 +39,11 @@ func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.InteractionReq
 }
 
 func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	value, _ := i.Data.Options.String("value")
-	name, _ := i.Data.Options.String("name")
+	data, _ := components.GetInteractionData[components.SlashInteractionData](i.Interaction)
+	value, _ := data.Options.String("value")
+	name, _ := data.Options.String("name")
 
-	user, err := i.Data.OptionsUser("user")
+	user, err := data.OptionsUser("user")
 	if err != nil {
 		user = i.Member.User
 	}
@@ -53,7 +56,7 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
 		value: value,
 	}
 
-	w.Respond(corde.NewResp().Contentf("Successfully added %s", name).Ephemeral())
+	w.Respond(components.NewResp().Contentf("Successfully added %s", name).Ephemeral())
 }
 
 func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) {
@@ -61,7 +64,7 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) 
 	defer t.mu.Unlock()
 
 	if len(t.list) == 0 {
-		w.Respond(corde.NewResp().Content("no todos").Ephemeral())
+		w.Respond(components.NewResp().Content("no todos").Ephemeral())
 		return
 	}
 
@@ -72,7 +75,7 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) 
 		i++
 	}
 
-	w.Respond(corde.NewEmbed().
+	w.Respond(components.NewEmbed().
 		Title("Todo list").
 		Description(s.String()).
 		Color(0x69b00b),
@@ -80,15 +83,16 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) 
 }
 
 func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
+	data, _ := components.GetInteractionData[components.SlashInteractionData](i.Interaction)
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	name, _ := i.Data.Options.String("name")
+	name, _ := data.Options.String("name")
 	if _, ok := t.list[name]; !ok {
-		w.Respond(corde.NewResp().Contentf("%s not found", name).Ephemeral())
+		w.Respond(components.NewResp().Contentf("%s not found", name).Ephemeral())
 		return
 	}
 
 	delete(t.list, name)
-	w.Respond(corde.NewResp().Contentf("deleted todo %s", name).Ephemeral())
+	w.Respond(components.NewResp().Contentf("deleted todo %s", name).Ephemeral())
 }

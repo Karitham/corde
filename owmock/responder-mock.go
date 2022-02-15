@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Karitham/corde"
+	"github.com/Karitham/corde/components"
 )
 
 // ResponseWriterMock mocks corde's ResponseWriter interface
@@ -78,6 +79,6 @@ func (r ResponseWriterMock) Autocomplete(i corde.InteractionResponder) {
 // type	interaction callback type	the type of response
 // data?	interaction callback data	an optional response message
 type InteractionResponse struct {
-	Type corde.InteractionType     `json:"type"`
-	Data corde.InteractionRespData `json:"data,omitempty"`
+	Type components.InteractionType     `json:"type"`
+	Data components.InteractionRespData `json:"data,omitempty"`
 }
