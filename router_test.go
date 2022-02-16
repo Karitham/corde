@@ -36,7 +36,7 @@ func TestRoute(t *testing.T) {
 	m.Command("foo/bar/baz", nil)
 
 	var commands []string
-	for cmd := range m.routes.command.ToMap() {
+	for cmd := range m.routes.ToMap() {
 		commands = append(commands, cmd)
 	}
 

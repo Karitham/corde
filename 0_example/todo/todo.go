@@ -21,7 +21,7 @@ type todoItem struct {
 	value string
 }
 
-func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.InteractionRequest) {
+func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.InteractionRequest[components.AutocompleteInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -38,12 +38,11 @@ func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.InteractionReq
 	w.Autocomplete(resp)
 }
 
-func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	data, _ := components.GetInteractionData[components.SlashInteractionData](i.Interaction)
-	value, _ := data.Options.String("value")
-	name, _ := data.Options.String("name")
+func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest[components.SlashCommandInteractionData]) {
+	value, _ := i.Data.Options.String("value")
+	name, _ := i.Data.Options.String("name")
 
-	user, err := data.OptionsUser("user")
+	user, err := i.Data.OptionsUser("user")
 	if err != nil {
 		user = i.Member.User
 	}
@@ -59,7 +58,7 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
 	w.Respond(components.NewResp().Contentf("Successfully added %s", name).Ephemeral())
 }
 
-func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) {
+func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest[components.SlashCommandInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -82,12 +81,11 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.InteractionRequest) 
 	)
 }
 
-func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.InteractionRequest) {
-	data, _ := components.GetInteractionData[components.SlashInteractionData](i.Interaction)
+func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.InteractionRequest[components.SlashCommandInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	name, _ := data.Options.String("name")
+	name, _ := i.Data.Options.String("name")
 	if _, ok := t.list[name]; !ok {
 		w.Respond(components.NewResp().Contentf("%s not found", name).Ephemeral())
 		return

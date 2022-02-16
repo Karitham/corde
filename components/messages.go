@@ -31,7 +31,7 @@ type Message struct {
 	MessageReference  MessageReference      `json:"message_reference,omitempty"`
 	Flags             MessageFlag           `json:"flags,omitempty"`
 	ReferencedMessage *Message              `json:"referenced_message,omitempty"`
-	Interaction       *Interaction          `json:"interaction,omitempty"`
+	Interaction       *Interaction[JsonRaw] `json:"interaction,omitempty"`
 	Thread            Channel               `json:"thread,omitempty"`
 	Components        []Component           `json:"components,omitempty"`
 	StickerItems      []StickerItem         `json:"sticker_items,omitempty"`
