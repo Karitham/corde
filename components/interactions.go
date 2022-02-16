@@ -149,7 +149,7 @@ func (i *Interaction[JsonRaw]) UnmarshalJSON(b []byte) error {
 	// If we remove it, we get a compiler crash
 	// I haven't been able to figure out why, and I can't manage to reproduce this, nor make sense of it.
 	// It seems the compiler is having issues with rewriting the IR for generic types, notably assignments
-	i.Data = bt.Data
+	// i.Data = bt.Data
 
 	// Error is
 	// # github.com/Karitham/corde/components
