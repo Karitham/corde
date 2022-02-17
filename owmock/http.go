@@ -6,13 +6,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strconv"
 	"testing"
 	"time"
-
-	"github.com/matryer/is"
 )
 
 // req makes a defined request to the given uri
@@ -102,17 +101,22 @@ func (r *Requester) Post(body string) (json.RawMessage, error) {
 
 // PostExpect posts a payload and expects a response with the given body
 func (r *Requester) PostExpect(t *testing.T, body string, expectV any) error {
-	is := is.New(t)
 	resp, err := r.Post(body)
-	is.NoErr(err)
+	if err != nil {
+		return err
+	}
 
 	typ := reflect.TypeOf(expectV).Elem()
 	respV := reflect.New(typ).Interface()
 
 	b, _ := resp.MarshalJSON()
 	err = json.Unmarshal(b, respV)
-	is.NoErr(err)
+	if err != nil {
+		return err
+	}
 
-	is.Equal(respV, expectV)
+	if !reflect.DeepEqual(respV, expectV) {
+		return fmt.Errorf("response does not match; got: %v, expected: %v", respV, expectV)
+	}
 	return nil
 }

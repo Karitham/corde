@@ -1,10 +1,6 @@
 package components
 
 import (
-	"encoding/json"
-	"path"
-	"strings"
-
 	"github.com/Karitham/corde/snowflake"
 )
 
@@ -35,13 +31,16 @@ const (
 type InnerInteractionType int
 
 const (
-	ButtonInteraction InnerInteractionType = iota + 1
+	// components
+	ActionRowInteraction InnerInteractionType = iota + 1
+	ButtonInteraction
+	SelectMenuInteraction
+	TextInputInteraction
 
-	SelectInteraction
-	ModalInteraction
-
+	// autocomplete
 	AutocompleteInteraction
 
+	// commands
 	SlashCommandInteraction
 	UserCommandInteraction
 	MessageCommandInteraction
@@ -49,11 +48,11 @@ const (
 
 // Interaction is a Discord Interaction
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interactions
-type Interaction[DataT InteractionDataConstraint] struct {
+type Interaction[T InteractionDataConstraint] struct {
 	ID            snowflake.Snowflake `json:"id"`
 	ApplicationID snowflake.Snowflake `json:"application_id"`
 	Type          InteractionType     `json:"type"`
-	Data          DataT               `json:"data,omitempty"`
+	Data          T                   `json:"data,omitempty"`
 	GuildID       snowflake.Snowflake `json:"guild_id,omitempty"`
 	ChannelID     snowflake.Snowflake `json:"channel_id,omitempty"`
 	Member        Member              `json:"member,omitempty"`
@@ -71,7 +70,7 @@ type Interaction[DataT InteractionDataConstraint] struct {
 type (
 	_basicT struct {
 		Type InteractionType `json:"type"`
-		Data JsonRaw         `json:"data,omitempty"`
+		Data []byte          `json:"data,omitempty"`
 	}
 
 	_appCommandT struct {
@@ -87,77 +86,6 @@ type (
 	}
 )
 
-func (i *Interaction[JsonRaw]) UnmarshalJSON(b []byte) error {
-	// TODO(@Karitham): Finish unmarshalling stuff
-
-	var bt _basicT
-	if err := json.Unmarshal(b, &bt); err != nil {
-		return err
-	}
-
-	switch bt.Type {
-	case INTERACTION_TYPE_PING:
-	case INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
-		var data AutocompleteInteractionData
-		if err := json.Unmarshal(bt.Data, &data); err != nil {
-			return err
-		}
-
-		group := data.Options[RouteInteractionSubcommandGroup]
-		cmd := data.Options[RouteInteractionSubcommand]
-		focused := data.Options[RouteInteractionFocused]
-
-		i.InnerInteractionType = AutocompleteInteraction
-
-		i.Route = path.Join(data.Name, group.String(), cmd.String(), focused.String())
-	case INTERACTION_TYPE_APPLICATION_COMMAND:
-		i.Type = INTERACTION_TYPE_APPLICATION_COMMAND
-
-		var data _appCommandT
-		if err := json.Unmarshal(b, &data); err != nil {
-			return err
-		}
-
-		switch data.Type {
-		case 1:
-			i.InnerInteractionType = SlashCommandInteraction
-		case 2:
-			i.InnerInteractionType = UserCommandInteraction
-		case 3:
-			i.InnerInteractionType = MessageCommandInteraction
-		default:
-			i.InnerInteractionType = SlashCommandInteraction
-		}
-
-		if data.Type != 1 {
-			data.Name = path.Join(strings.Fields(data.Name)...)
-		}
-
-		group := data.Options[RouteInteractionSubcommandGroup]
-		cmd := data.Options[RouteInteractionSubcommand]
-		i.Route = path.Join(data.Name, group.String(), cmd.String())
-	case INTERACTION_TYPE_MESSAGE_COMPONENT:
-		i.Type = INTERACTION_TYPE_MESSAGE_COMPONENT
-
-		var data _messageComponentT
-		if err := json.Unmarshal(b, &data); err != nil {
-			return err
-		}
-	}
-
-	// This should 100% be valid
-	// If we remove it, we get a compiler crash
-	// I haven't been able to figure out why, and I can't manage to reproduce this, nor make sense of it.
-	// It seems the compiler is having issues with rewriting the IR for generic types, notably assignments
-	// i.Data = bt.Data
-
-	// Error is
-	// # github.com/Karitham/corde/components
-	// components/interactions.go:152:11: cannot use bt.Data (variable of type JsonRaw) as type JsonRaw in assignment
-
-	return nil
-}
-
 type (
 	// InteractionDataConstraint is the constraint for the interaction data
 	// It contains all the possible values for interaction data
@@ -165,6 +93,7 @@ type (
 		JsonRaw |
 			ButtonInteractionData |
 			SelectInteractionData |
+			TextInputInteractionData |
 			ModalInteractionData |
 			UserCommandInteractionData |
 			MessageCommandInteractionData |
@@ -194,6 +123,19 @@ type (
 		CustomID      string        `json:"custom_id,omitempty"`
 		ComponentType ComponentType `json:"component_type"`
 		Values        []any         `json:"values,omitempty"`
+	}
+
+	TextInputInteractionData struct {
+		CustomID    string      `json:"custom_id"`
+		Title       string      `json:"title"`
+		Style       int         `json:"style"`
+		Label       string      `json:"label"`
+		MinLenght   int         `json:"min_length,omitempty"`
+		MaxLenght   int         `json:"max_length,omitempty"`
+		Required    bool        `json:"required,omitempty"`
+		Value       string      `json:"value,omitempty"`
+		Placeholder string      `json:"placeholder,omitempty"`
+		Components  []Component `json:"components"`
 	}
 
 	ModalInteractionData struct {
@@ -226,6 +168,15 @@ type (
 		ID   snowflake.Snowflake `json:"id"`
 		Name string              `json:"name"`
 		Type int                 `json:"type"`
+		resolvedInteractionWithOptions
+	}
+
+	PartialRoutingType struct {
+		ID            snowflake.Snowflake `json:"id"`
+		Type          int                 `json:"type"`
+		ComponentType int                 `json:"component_type"`
+		Name          string              `json:"name"`
+		CustomID      string              `json:"custom_id"`
 		resolvedInteractionWithOptions
 	}
 )

@@ -8,107 +8,9 @@ import (
 	"net/http"
 	"path"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/Karitham/corde/components"
-	"github.com/Karitham/corde/internal/rest"
-	"github.com/Karitham/corde/snowflake"
-	radix "github.com/akrennmair/go-radix"
 )
-
-// Mux is a discord gateway muxer, which handles the routing
-type Mux struct {
-	rMu        *sync.RWMutex
-	routes     *radix.Tree[Handlers]
-	PublicKey  string // the hex public key provided by discord
-	BasePath   string // base route path, default is "/"
-	OnNotFound func(ResponseWriter, *InteractionRequest[components.JsonRaw])
-	Client     *http.Client
-	AppID      snowflake.Snowflake
-	BotToken   string
-
-	handler http.Handler
-}
-
-// Lock the mux, to be able to mount or unmount routes
-func (m *Mux) Lock() {
-	m.rMu.Lock()
-}
-
-// Unlock the mux, so it can route again
-func (m *Mux) Unlock() {
-	m.rMu.Unlock()
-}
-
-// Mount is for mounting a Handler on the Mux
-func (m *Mux) Mount(typ components.InnerInteractionType, route string, handler any) {
-	m.rMu.Lock()
-	defer m.rMu.Unlock()
-
-	if r, ok := m.routes.Get(route); ok {
-		(*r)[typ] = handler
-	} else {
-		m.routes.Insert(route, &Handlers{typ: handler})
-	}
-}
-
-// Button mounts a button route on the mux
-func (m *Mux) Button(route string, handler func(ResponseWriter, *InteractionRequest[components.ButtonInteractionData])) {
-	m.Mount(components.ButtonInteraction, route, handler)
-}
-
-// Autocomplete mounts an autocomplete route on the mux
-func (m *Mux) Autocomplete(route string, handler func(ResponseWriter, *InteractionRequest[components.AutocompleteInteractionData])) {
-	m.Mount(components.AutocompleteInteraction, route, handler)
-}
-
-// Command mounts a slash command route on the mux
-func (m *Mux) Command(route string, handler func(ResponseWriter, *InteractionRequest[components.SlashCommandInteractionData])) {
-	m.Mount(components.SlashCommandInteraction, route, handler)
-}
-
-// Route routes common parts along a pattern
-func (m *Mux) Route(pattern string, fn func(m *Mux)) {
-	if fn == nil {
-		panic(fmt.Sprintf("corde: attempting to Route() a nil subrouter on %q", pattern))
-	}
-
-	r := NewMux(m.PublicKey, m.AppID, m.BotToken)
-	fn(r)
-
-	pattern = strings.TrimLeft(pattern, "/")
-	for route, handler := range r.routes.ToMap() {
-		m.routes.Insert(path.Join(pattern, route), handler)
-	}
-}
-
-// NewMux returns a new mux for routing slash commands
-//
-// When you mount a command on the mux, it's prefix based routed,
-// which means you can route to a button like `/list/next/456132153` having mounted `/list/next`
-func NewMux(publicKey string, appID snowflake.Snowflake, botToken string) *Mux {
-	m := &Mux{
-		rMu:       &sync.RWMutex{},
-		routes:    radix.New[Handlers](),
-		PublicKey: publicKey,
-		BasePath:  "/",
-		OnNotFound: func(_ ResponseWriter, i *InteractionRequest[components.JsonRaw]) {
-			log.Printf("No handler for registered command: %s\n", i.Route)
-		},
-		Client: &http.Client{
-			Timeout: 10 * time.Second,
-		},
-		AppID:    appID,
-		BotToken: botToken,
-	}
-
-	m.handler = rest.Verify(publicKey)(http.HandlerFunc(m.route))
-	return m
-}
-
-// Handlers handles incoming requests
-type Handlers map[components.InnerInteractionType]any
 
 // ResponseWriter handles responding to interactions
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
@@ -121,8 +23,8 @@ type ResponseWriter interface {
 	Autocomplete(InteractionResponder)
 }
 
-// InteractionRequest is an incoming request Interaction
-type InteractionRequest[T components.InteractionDataConstraint] struct {
+// Request is an incoming request Interaction
+type Request[T components.InteractionDataConstraint] struct {
 	components.Interaction[T]
 	Context context.Context
 }
@@ -142,21 +44,63 @@ func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // route handles routing the requests
 func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
-	i := &InteractionRequest[components.JsonRaw]{
+	i := &Request[components.JsonRaw]{
 		Context: r.Context(),
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&i.Data); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&i); err != nil {
 		log.Println("Errors unmarshalling json: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
+	}
+
+	var data components.PartialRoutingType
+	i.Data.UnmarshalTo(&data)
+
+	// build route
+	group := data.Options[components.RouteInteractionSubcommandGroup]
+	cmd := data.Options[components.RouteInteractionSubcommand]
+	focused := data.Options[components.RouteInteractionFocused]
+	data.Name = path.Join(strings.Fields(data.Name)...)
+	i.Route = path.Join(data.Name, data.CustomID, group.String(), cmd.String(), focused.String())
+
+	// Find inner type
+	switch i.Type {
+	case components.INTERACTION_TYPE_PING:
+		i.Type = components.INTERACTION_TYPE_PING
+	case components.INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
+		i.InnerInteractionType = components.AutocompleteInteraction
+	case components.INTERACTION_TYPE_APPLICATION_COMMAND:
+		i.Type = components.INTERACTION_TYPE_APPLICATION_COMMAND
+		switch data.Type {
+		case 1:
+			i.InnerInteractionType = components.SlashCommandInteraction
+		case 2:
+			i.InnerInteractionType = components.UserCommandInteraction
+		case 3:
+			i.InnerInteractionType = components.MessageCommandInteraction
+		default:
+			i.InnerInteractionType = components.SlashCommandInteraction
+		}
+	case components.INTERACTION_TYPE_MESSAGE_COMPONENT:
+		i.Type = components.INTERACTION_TYPE_MESSAGE_COMPONENT
+		switch data.ComponentType {
+		case 1:
+			i.InnerInteractionType = components.ActionRowInteraction
+		case 2:
+			i.InnerInteractionType = components.ButtonInteraction
+		case 3:
+			i.InnerInteractionType = components.SelectMenuInteraction
+		case 4:
+			i.InnerInteractionType = components.TextInputInteraction
+		}
 	}
 
 	m.routeReq(&Responder{w: w}, i)
 }
 
 // routeReq is a recursive implementation to route requests
-func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest[components.JsonRaw]) {
+func (m *Mux) routeReq(r ResponseWriter, i *Request[components.JsonRaw]) {
 	m.rMu.RLock()
 	defer m.rMu.RUnlock()
 	if i.Type == components.INTERACTION_TYPE_PING {
@@ -168,12 +112,15 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest[components.JsonRa
 	if _, handler, ok := m.routes.LongestPrefix(i.Route); ok {
 		switch i.InnerInteractionType {
 		// Component
-		case components.ButtonInteraction:
+		case components.ButtonInteraction: // works & tested
 			err = routeRequest[components.ButtonInteractionData](*handler, i.InnerInteractionType, r, i)
-		case components.ModalInteraction:
+		case components.SelectMenuInteraction:
 			err = routeRequest[components.ModalInteractionData](*handler, i.InnerInteractionType, r, i)
-		case components.SelectInteraction:
+		case components.ActionRowInteraction:
 			err = routeRequest[components.SelectInteractionData](*handler, i.InnerInteractionType, r, i)
+		case components.TextInputInteraction:
+			err = routeRequest[components.TextInputInteractionData](*handler, i.InnerInteractionType, r, i)
+
 		// Autocomplete
 		case components.AutocompleteInteraction:
 			err = routeRequest[components.AutocompleteInteractionData](*handler, i.InnerInteractionType, r, i)
@@ -185,7 +132,6 @@ func (m *Mux) routeReq(r ResponseWriter, i *InteractionRequest[components.JsonRa
 			err = routeRequest[components.MessageCommandInteractionData](*handler, i.InnerInteractionType, r, i)
 		case components.UserCommandInteraction:
 			err = routeRequest[components.UserCommandInteractionData](*handler, i.InnerInteractionType, r, i)
-
 		}
 	}
 	if err != nil {
@@ -203,13 +149,16 @@ func routeRequest[IntReqData components.InteractionDataConstraint](
 	routes map[components.InnerInteractionType]any,
 	it components.InnerInteractionType,
 	r ResponseWriter,
-	rawI *InteractionRequest[components.JsonRaw],
+	rawI *Request[components.JsonRaw],
 ) error {
-	if h, ok := routes[it].(func(ResponseWriter, *InteractionRequest[IntReqData])); ok {
+	if h, ok := routes[it].(func(ResponseWriter, *Request[IntReqData])); ok {
 		var intValues components.Interaction[IntReqData]
+		v, _ := json.Marshal(rawI) // Better than mapping by hand, but I hate it
+		if err := json.Unmarshal(v, &intValues); err != nil {
+			return err
+		}
 
-		json.Unmarshal(rawI.Data, &intValues)
-		h(r, &InteractionRequest[IntReqData]{Context: rawI.Context, Interaction: intValues})
+		h(r, &Request[IntReqData]{Context: rawI.Context, Interaction: intValues})
 		return nil
 	}
 

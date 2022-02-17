@@ -16,7 +16,7 @@ func Test_list(t *testing.T) {
 	tests := []struct {
 		name        string
 		mock        owmock.ResponseWriterMock
-		interaction *corde.InteractionRequest[components.SlashCommandInteractionData]
+		interaction *corde.Request[components.SlashCommandInteractionData]
 	}{
 		{
 			name: "list",
@@ -31,7 +31,7 @@ func Test_list(t *testing.T) {
 					}
 				},
 			},
-			interaction: &corde.InteractionRequest[components.SlashCommandInteractionData]{},
+			interaction: &corde.Request[components.SlashCommandInteractionData]{},
 		},
 	}
 	for _, tt := range tests {
@@ -46,8 +46,8 @@ func Test_btnNext(t *testing.T) {
 	tests := []struct {
 		name        string
 		mock        owmock.ResponseWriterMock
-		interaction *corde.InteractionRequest[components.ButtonInteractionData]
-		fn          func(corde.ResponseWriter, *corde.InteractionRequest[components.ButtonInteractionData])
+		interaction *corde.Request[components.ButtonInteractionData]
+		fn          func(corde.ResponseWriter, *corde.Request[components.ButtonInteractionData])
 	}{
 		{
 			name: "btn next",
@@ -64,7 +64,7 @@ func Test_btnNext(t *testing.T) {
 					}
 				},
 			},
-			interaction: &corde.InteractionRequest[components.ButtonInteractionData]{},
+			interaction: &corde.Request[components.ButtonInteractionData]{},
 			fn:          btnNext(&corde.Mux{Client: http.DefaultClient}, corde.GuildOpt(0), &sync.Mutex{}, &selectedID),
 		},
 	}

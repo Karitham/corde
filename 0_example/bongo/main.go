@@ -27,7 +27,7 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.Command("bongo", bongoHandler)
+	m.SlashCommand("bongo", bongoHandler)
 
 	g := corde.GuildOpt(snowflake.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	if err := m.RegisterCommand(command, g); err != nil {
@@ -40,7 +40,7 @@ func main() {
 	}
 }
 
-func bongoHandler(w corde.ResponseWriter, _ *corde.InteractionRequest[components.SlashCommandInteractionData]) {
+func bongoHandler(w corde.ResponseWriter, _ *corde.Request[components.SlashCommandInteractionData]) {
 	resp, err := http.Get("https://cdn.discordapp.com/emojis/745709799890747434.gif?size=128")
 	if err != nil {
 		w.Respond(components.NewResp().Content("couldn't retrieve bongo").Ephemeral())

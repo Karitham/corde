@@ -41,8 +41,8 @@ func main() {
 	}
 
 	m.Route("nft", func(m *corde.Mux) {
-		m.Mount(components.UserCommandInteraction, "user", NFTuser)
-		m.Mount(components.MessageCommandInteraction, "message", NFTmessage)
+		m.UserCommand("user", NFTuser)
+		m.MessageCommand("message", NFTmessage)
 	})
 
 	log.Println("serving on :8070")
@@ -51,7 +51,7 @@ func main() {
 	}
 }
 
-func NFTuser(w corde.ResponseWriter, i *corde.InteractionRequest[components.UserCommandInteractionData]) {
+func NFTuser(w corde.ResponseWriter, i *corde.Request[components.UserCommandInteractionData]) {
 	user := i.Data.Resolved.Users.First()
 	url := user.AvatarURL()
 
@@ -74,7 +74,7 @@ func NFTuser(w corde.ResponseWriter, i *corde.InteractionRequest[components.User
 	)
 }
 
-func NFTmessage(w corde.ResponseWriter, i *corde.InteractionRequest[components.MessageCommandInteractionData]) {
+func NFTmessage(w corde.ResponseWriter, i *corde.Request[components.MessageCommandInteractionData]) {
 	msg := i.Data.Resolved.Messages.First()
 	chanID := msg.ChannelID
 	msgID := msg.ID

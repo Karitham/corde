@@ -14,8 +14,11 @@ func TestComponentInteraction(t *testing.T) {
 	assert := is.New(t)
 	pub, _ := owmock.GenerateKeys()
 	mux := corde.NewMux(pub, 0, "")
+	mux.OnNotFound = func(_ corde.ResponseWriter, ir *corde.Request[components.JsonRaw]) {
+		t.Log(ir)
+	}
 
-	mux.Button("click_one", func(w corde.ResponseWriter, _ *corde.InteractionRequest[components.ButtonInteractionData]) {
+	mux.ButtonComponent("click_one", func(w corde.ResponseWriter, _ *corde.Request[components.ButtonInteractionData]) {
 		w.Respond(&components.InteractionRespData{
 			Content: "Hello World!",
 		})

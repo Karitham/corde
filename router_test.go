@@ -15,25 +15,25 @@ func TestRoute(t *testing.T) {
 
 	m.Route("foo", func(m *Mux) {
 		m.Route("bar", func(m *Mux) {
-			m.Command("baz", nil)
+			m.SlashCommand("baz", nil)
 		})
 	})
 	m.Route("/foo", func(m *Mux) {
 		m.Route("/bar", func(m *Mux) {
-			m.Command("/baz", nil)
+			m.SlashCommand("/baz", nil)
 		})
 	})
 	m.Route("foo/", func(m *Mux) {
 		m.Route("bar/", func(m *Mux) {
-			m.Command("baz/", nil)
+			m.SlashCommand("baz/", nil)
 		})
 	})
 	m.Route("/foo/", func(m *Mux) {
 		m.Route("/bar/", func(m *Mux) {
-			m.Command("/baz/", nil)
+			m.SlashCommand("/baz/", nil)
 		})
 	})
-	m.Command("foo/bar/baz", nil)
+	m.SlashCommand("foo/bar/baz", nil)
 
 	var commands []string
 	for cmd := range m.routes.ToMap() {
