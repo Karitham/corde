@@ -157,6 +157,7 @@ func routeRequest[IntReqData components.InteractionDataConstraint](
 		if err := json.Unmarshal(v, &intValues); err != nil {
 			return err
 		}
+		intValues.Route = rawI.Route
 
 		h(r, &Request[IntReqData]{Context: rawI.Context, Interaction: intValues})
 		return nil
