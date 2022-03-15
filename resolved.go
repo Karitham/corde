@@ -1,9 +1,7 @@
-package components
+package corde
 
 import (
 	"fmt"
-
-	"github.com/Karitham/corde/snowflake"
 )
 
 // OptionsUser returns the resolved User for an Option
@@ -71,8 +69,8 @@ type ResolvedDataConstraint interface {
 	User | Member | Role | Message
 }
 
-// ResolvedData is a generic mapping of snowflake.Snowflakes to resolved data structs
-type ResolvedData[T ResolvedDataConstraint] map[snowflake.Snowflake]T
+// ResolvedData is a generic mapping of Snowflakes to resolved data structs
+type ResolvedData[T ResolvedDataConstraint] map[Snowflake]T
 
 // First returns the first resolved data
 // ResolvedData is a map (which is unordered), so First

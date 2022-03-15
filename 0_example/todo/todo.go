@@ -6,9 +6,8 @@ import (
 	"sync"
 
 	"github.com/Karitham/corde"
-	"github.com/Karitham/corde/components"
+
 	"github.com/Karitham/corde/format"
-	"github.com/Karitham/corde/snowflake"
 )
 
 type todo struct {
@@ -17,20 +16,20 @@ type todo struct {
 }
 
 type todoItem struct {
-	user  snowflake.Snowflake
+	user  corde.Snowflake
 	value string
 }
 
-func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.Request[components.AutocompleteInteractionData]) {
+func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.Request[corde.AutocompleteInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	if len(t.list) == 0 {
-		w.Autocomplete(components.NewResp())
+		w.Autocomplete(corde.NewResp())
 		return
 	}
 
-	resp := components.NewResp()
+	resp := corde.NewResp()
 	for k := range t.list {
 		resp.Choice(k, k)
 	}
@@ -38,7 +37,7 @@ func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.Request[compon
 	w.Autocomplete(resp)
 }
 
-func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Request[components.SlashCommandInteractionData]) {
+func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Request[corde.SlashCommandInteractionData]) {
 	value, _ := i.Data.Options.String("value")
 	name, _ := i.Data.Options.String("name")
 
@@ -55,15 +54,15 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Request[components.Sl
 		value: value,
 	}
 
-	w.Respond(components.NewResp().Contentf("Successfully added %s", name).Ephemeral())
+	w.Respond(corde.NewResp().Contentf("Successfully added %s", name).Ephemeral())
 }
 
-func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Request[components.SlashCommandInteractionData]) {
+func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Request[corde.SlashCommandInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	if len(t.list) == 0 {
-		w.Respond(components.NewResp().Content("no todos").Ephemeral())
+		w.Respond(corde.NewResp().Content("no todos").Ephemeral())
 		return
 	}
 
@@ -74,23 +73,23 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Request[components.S
 		i++
 	}
 
-	w.Respond(components.NewEmbed().
+	w.Respond(corde.NewEmbed().
 		Title("Todo list").
 		Description(s.String()).
 		Color(0x69b00b),
 	)
 }
 
-func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.Request[components.SlashCommandInteractionData]) {
+func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.Request[corde.SlashCommandInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	name, _ := i.Data.Options.String("name")
 	if _, ok := t.list[name]; !ok {
-		w.Respond(components.NewResp().Contentf("%s not found", name).Ephemeral())
+		w.Respond(corde.NewResp().Contentf("%s not found", name).Ephemeral())
 		return
 	}
 
 	delete(t.list, name)
-	w.Respond(components.NewResp().Contentf("deleted todo %s", name).Ephemeral())
+	w.Respond(corde.NewResp().Contentf("deleted todo %s", name).Ephemeral())
 }

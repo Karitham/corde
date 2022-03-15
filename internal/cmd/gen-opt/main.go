@@ -19,7 +19,7 @@ var types = []string{
 	"float32",
 	"float64",
 	"bool",
-	"snowflake.Snowflake",
+	"Snowflake",
 	"any",
 }
 

@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/Karitham/corde"
-	"github.com/Karitham/corde/snowflake"
 )
 
 var commands = corde.NewSlashCommand("todo", "view edit and remove todos",
@@ -26,7 +25,7 @@ func main() {
 	if token == "" {
 		log.Fatalln("DISCORD_BOT_TOKEN not set")
 	}
-	appID := snowflake.SnowflakeFromString(os.Getenv("DISCORD_APP_ID"))
+	appID := corde.SnowflakeFromString(os.Getenv("DISCORD_APP_ID"))
 	if appID == 0 {
 		log.Fatalln("DISCORD_APP_ID not set")
 	}
@@ -50,7 +49,7 @@ func main() {
 		})
 	})
 
-	g := corde.GuildOpt(snowflake.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
+	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	if err := m.RegisterCommand(commands, g); err != nil {
 		log.Fatalln(err)
 	}

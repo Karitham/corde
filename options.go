@@ -1,9 +1,7 @@
-package components
+package corde
 
 import (
 	"encoding/json"
-
-	"github.com/Karitham/corde/snowflake"
 )
 
 type OptionType int
@@ -31,15 +29,15 @@ const (
 
 // Command is a Discord application command
 type Command struct {
-	Name              string              `json:"name,omitempty"`
-	ID                snowflake.Snowflake `json:"id,omitempty"`
-	Type              CommandType         `json:"type,omitempty"`
-	ApplicationID     snowflake.Snowflake `json:"application_id,omitempty"`
-	GuildID           snowflake.Snowflake `json:"guild_id,omitempty"`
-	Description       string              `json:"description,omitempty"`
-	Options           []Option            `json:"options,omitempty"`
-	DefaultPermission bool                `json:"default_permission,omitempty"`
-	Version           snowflake.Snowflake `json:"version,omitempty"`
+	Name              string      `json:"name,omitempty"`
+	ID                Snowflake   `json:"id,omitempty"`
+	Type              CommandType `json:"type,omitempty"`
+	ApplicationID     Snowflake   `json:"application_id,omitempty"`
+	GuildID           Snowflake   `json:"guild_id,omitempty"`
+	Description       string      `json:"description,omitempty"`
+	Options           []Option    `json:"options,omitempty"`
+	DefaultPermission bool        `json:"default_permission,omitempty"`
+	Version           Snowflake   `json:"version,omitempty"`
 }
 
 // Option is an option for an application Command

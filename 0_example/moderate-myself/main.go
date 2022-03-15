@@ -6,8 +6,6 @@ import (
 	"sync"
 
 	"github.com/Karitham/corde"
-	"github.com/Karitham/corde/components"
-	"github.com/Karitham/corde/snowflake"
 )
 
 var command = corde.NewSlashCommand(
@@ -21,7 +19,7 @@ func main() {
 	if token == "" {
 		log.Fatalln("DISCORD_BOT_TOKEN not set")
 	}
-	appID := snowflake.SnowflakeFromString(os.Getenv("DISCORD_APP_ID"))
+	appID := corde.SnowflakeFromString(os.Getenv("DISCORD_APP_ID"))
 	if appID == 0 {
 		log.Fatalln("DISCORD_APP_ID not set")
 	}
@@ -30,7 +28,7 @@ func main() {
 		log.Fatalln("DISCORD_PUBLIC_KEY not set")
 	}
 
-	g := corde.GuildOpt(snowflake.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
+	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 
 	mu := &sync.Mutex{}
 	selectedID := 0
@@ -54,25 +52,25 @@ func main() {
 	}
 }
 
-var nextBtn = components.Component{
-	Type:     components.COMPONENT_BUTTON,
+var nextBtn = corde.Component{
+	Type:     corde.COMPONENT_BUTTON,
 	CustomID: "cmd/list/next",
-	Style:    components.BUTTON_SECONDARY,
+	Style:    corde.BUTTON_SECONDARY,
 	Label:    "Next",
-	Emoji:    &components.Emoji{Name: "➡️"},
+	Emoji:    &corde.Emoji{Name: "➡️"},
 }
 
-var delBtn = components.Component{
-	Type:     components.COMPONENT_BUTTON,
+var delBtn = corde.Component{
+	Type:     corde.COMPONENT_BUTTON,
 	CustomID: "cmd/list/remove",
-	Style:    components.BUTTON_DANGER,
+	Style:    corde.BUTTON_DANGER,
 	Label:    "Delete",
-	Emoji:    &components.Emoji{Name: "🗑️"},
+	Emoji:    &corde.Emoji{Name: "🗑️"},
 }
 
-func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Request[components.SlashCommandInteractionData]) {
-	return func(w corde.ResponseWriter, _ *corde.Request[components.SlashCommandInteractionData]) {
-		w.Respond(components.NewResp().
+func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Request[corde.SlashCommandInteractionData]) {
+	return func(w corde.ResponseWriter, _ *corde.Request[corde.SlashCommandInteractionData]) {
+		w.Respond(corde.NewResp().
 			ActionRow(nextBtn).
 			Ephemeral().
 			Content("Click on the buttons to move between existing commands and or delete them."),
@@ -80,23 +78,23 @@ func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *
 	}
 }
 
-func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Request[components.ButtonInteractionData]) {
-	return func(w corde.ResponseWriter, _ *corde.Request[components.ButtonInteractionData]) {
+func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Request[corde.ButtonInteractionData]) {
+	return func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
 		mu.Lock()
 		defer mu.Unlock()
 		commands, err := m.GetCommands(g)
 		if err != nil {
-			w.Update(components.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral())
+			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral())
 			return
 		}
 		if len(commands) == 0 {
-			w.Update(components.NewResp().Content("No commands found.").Ephemeral())
+			w.Update(corde.NewResp().Content("No commands found.").Ephemeral())
 			return
 		}
 
 		*selectedID = (*selectedID + 1) % len(commands)
 
-		w.Update(components.NewResp().
+		w.Update(corde.NewResp().
 			Contentf("%s - %s", commands[*selectedID].Name, commands[*selectedID].Description).
 			ActionRow(nextBtn, delBtn).
 			Ephemeral(),
@@ -104,13 +102,13 @@ func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedI
 	}
 }
 
-func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Request[components.ButtonInteractionData]) {
-	return func(w corde.ResponseWriter, _ *corde.Request[components.ButtonInteractionData]) {
+func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Request[corde.ButtonInteractionData]) {
+	return func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
 		mu.Lock()
 		defer mu.Unlock()
 		commands, err := m.GetCommands(g)
 		if err != nil {
-			w.Update(components.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral())
+			w.Update(corde.NewResp().Contentf("Error getting commands: %s", err.Error()).Ephemeral())
 			return
 		}
 		c := commands[*selectedID]
@@ -119,13 +117,13 @@ func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selecte
 
 		commands, _ = m.GetCommands(g)
 		if len(commands) == 0 {
-			w.Update(components.NewResp().Content("No commands found.").Ephemeral())
+			w.Update(corde.NewResp().Content("No commands found.").Ephemeral())
 			return
 		}
 
 		*selectedID = (*selectedID + 1) % len(commands)
 
-		w.Update(components.NewResp().
+		w.Update(corde.NewResp().
 			Contentf("%s - %s", commands[*selectedID].Name, commands[*selectedID].Description).
 			ActionRow(nextBtn, delBtn).
 			Ephemeral(),

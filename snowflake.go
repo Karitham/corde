@@ -1,4 +1,4 @@
-package snowflake
+package corde
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 // Snowflake is a DiscordSnowflake ID
 type Snowflake uint64
 
-// SnowflakeFromString returns aSnowflake from a string
+// corde.SnowflakeFromString returns aSnowflake from a string
 func SnowflakeFromString(s string) Snowflake {
 	i, _ := strconv.ParseUint(s, 10, 64)
 	return Snowflake(i)

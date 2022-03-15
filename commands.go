@@ -1,25 +1,23 @@
 package corde
 
 import (
-	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/internal/rest"
-	"github.com/Karitham/corde/snowflake"
 )
 
 // CommandsOpt is an option for a Command
 type CommandsOpt struct {
-	guildID snowflake.Snowflake
+	guildID Snowflake
 }
 
 // GuildOpt is an option for setting the guild of a Command
-func GuildOpt(guildID snowflake.Snowflake) func(*CommandsOpt) {
+func GuildOpt(guildID Snowflake) func(*CommandsOpt) {
 	return func(opt *CommandsOpt) {
 		opt.guildID = guildID
 	}
 }
 
 // GetCommands returns a slice of Command from the Mux
-func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]components.Command, error) {
+func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]Command, error) {
 	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)
@@ -31,7 +29,7 @@ func (m *Mux) GetCommands(options ...func(*CommandsOpt)) ([]components.Command, 
 	}
 	r.Append("commands")
 
-	var commands []components.Command
+	var commands []Command
 	_, err := rest.DoJSON(m.Client, r.Get(m.authorize, rest.JSON), &commands)
 	if err != nil {
 		return nil, err
@@ -81,7 +79,7 @@ func (m *Mux) BulkRegisterCommand(c []CreateCommander, options ...func(*Commands
 }
 
 // DeleteCommand deletes a Command from discord
-func (m *Mux) DeleteCommand(ID snowflake.Snowflake, options ...func(*CommandsOpt)) error {
+func (m *Mux) DeleteCommand(ID Snowflake, options ...func(*CommandsOpt)) error {
 	opt := &CommandsOpt{}
 	for _, option := range options {
 		option(opt)

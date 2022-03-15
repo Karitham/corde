@@ -4,14 +4,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Karitham/corde/snowflake"
 	"github.com/matryer/is"
 )
 
 func TestRoute(t *testing.T) {
 	assert := is.New(t)
 
-	m := NewMux("", snowflake.Snowflake(0), "")
+	m := NewMux("", Snowflake(0), "")
 
 	m.Route("foo", func(m *Mux) {
 		m.Route("bar", func(m *Mux) {
@@ -44,6 +43,6 @@ func TestRoute(t *testing.T) {
 }
 
 func TestServeHTTP(t *testing.T) {
-	m := NewMux("", snowflake.Snowflake(0), "")
+	m := NewMux("", Snowflake(0), "")
 	httptest.NewServer(m)
 }

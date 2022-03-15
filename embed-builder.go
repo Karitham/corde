@@ -1,4 +1,4 @@
-package components
+package corde
 
 import (
 	"fmt"

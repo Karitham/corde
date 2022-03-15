@@ -9,9 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/internal/rest"
-	"github.com/Karitham/corde/snowflake"
 	"github.com/akrennmair/go-radix"
 )
 
@@ -21,9 +19,9 @@ type Mux struct {
 	routes     *radix.Tree[Handlers]
 	PublicKey  string // the hex public key provided by discord
 	BasePath   string // base route path, default is "/"
-	OnNotFound func(ResponseWriter, *Request[components.JsonRaw])
+	OnNotFound func(ResponseWriter, *Request[JsonRaw])
 	Client     *http.Client
-	AppID      snowflake.Snowflake
+	AppID      Snowflake
 	BotToken   string
 
 	handler http.Handler
@@ -43,13 +41,13 @@ func (m *Mux) Unlock() {
 //
 // When you mount a command on the mux, it's prefix based routed,
 // which means you can route to a button like `/list/next/456132153` having mounted `/list/next`
-func NewMux(publicKey string, appID snowflake.Snowflake, botToken string) *Mux {
+func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 	m := &Mux{
 		rMu:       &sync.RWMutex{},
 		routes:    radix.New[Handlers](),
 		PublicKey: publicKey,
 		BasePath:  "/",
-		OnNotFound: func(_ ResponseWriter, i *Request[components.JsonRaw]) {
+		OnNotFound: func(_ ResponseWriter, i *Request[JsonRaw]) {
 			log.Printf("No handler for registered command: %s\n", i.Route)
 		},
 		Client: &http.Client{
@@ -64,7 +62,7 @@ func NewMux(publicKey string, appID snowflake.Snowflake, botToken string) *Mux {
 }
 
 // Handlers handles incoming requests
-type Handlers map[components.InnerInteractionType]any
+type Handlers map[InnerInteractionType]any
 
 // Route routes common parts along a pattern
 func (m *Mux) Route(pattern string, fn func(m *Mux)) {
@@ -82,7 +80,7 @@ func (m *Mux) Route(pattern string, fn func(m *Mux)) {
 }
 
 // Mount is for mounting a Handler on the Mux
-func (m *Mux) Mount(typ components.InnerInteractionType, route string, handler any) {
+func (m *Mux) Mount(typ InnerInteractionType, route string, handler any) {
 	m.rMu.Lock()
 	defer m.rMu.Unlock()
 

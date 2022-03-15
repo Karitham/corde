@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Karitham/corde/snowflake"
+	"github.com/Karitham/corde"
 )
 
-// ID is a Discord ID, either in string form or snowflake.Snowflake form
+// ID is a Discord ID, either in string form or Snowflake form
 type ID interface {
-	~string | snowflake.Snowflake
+	~string | corde.Snowflake
 }
 
 // User returns a user mention

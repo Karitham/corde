@@ -1,11 +1,9 @@
-package components
+package corde
 
 import (
 	"io"
 	"strings"
 	"time"
-
-	"github.com/Karitham/corde/snowflake"
 )
 
 // InteractionRespData is the payload for responding to an interaction
@@ -42,17 +40,17 @@ type Thumbnail struct {
 
 // Attachement is the files attached to the request
 type Attachment struct {
-	Body        io.Reader           `json:"-"`
-	ID          snowflake.Snowflake `json:"id"`
-	Filename    string              `json:"filename"`
-	Description string              `json:"description,omitempty"`
-	ContentType string              `json:"content_type,omitempty"`
-	Size        int                 `json:"size,omitempty"`
-	URL         string              `json:"url,omitempty"`
-	ProxyURL    string              `json:"proxy_url,omitempty"`
-	Height      int                 `json:"height,omitempty"`
-	Width       int                 `json:"width,omitempty"`
-	Ephemeral   bool                `json:"ephemeral,omitempty"`
+	Body        io.Reader `json:"-"`
+	ID          Snowflake `json:"id"`
+	Filename    string    `json:"filename"`
+	Description string    `json:"description,omitempty"`
+	ContentType string    `json:"content_type,omitempty"`
+	Size        int       `json:"size,omitempty"`
+	URL         string    `json:"url,omitempty"`
+	ProxyURL    string    `json:"proxy_url,omitempty"`
+	Height      int       `json:"height,omitempty"`
+	Width       int       `json:"width,omitempty"`
+	Ephemeral   bool      `json:"ephemeral,omitempty"`
 }
 
 // Embed is the embed object
@@ -143,7 +141,7 @@ type Image struct {
 }
 
 type MessageReference struct {
-	MessageID snowflake.Snowflake `json:"message_id"`
+	MessageID Snowflake `json:"message_id"`
 }
 
 // Video is an embed video

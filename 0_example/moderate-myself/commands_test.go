@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/Karitham/corde"
-	"github.com/Karitham/corde/components"
+
 	"github.com/Karitham/corde/owmock"
 )
 
@@ -16,7 +16,7 @@ func Test_list(t *testing.T) {
 	tests := []struct {
 		name        string
 		mock        owmock.ResponseWriterMock
-		interaction *corde.Request[components.SlashCommandInteractionData]
+		interaction *corde.Request[corde.SlashCommandInteractionData]
 	}{
 		{
 			name: "list",
@@ -26,12 +26,12 @@ func Test_list(t *testing.T) {
 					if data.Content != "Click on the buttons to move between existing commands and or delete them." {
 						t.Errorf("expected 'no todos' got %s", data.Content)
 					}
-					if data.Flags != components.RESPONSE_FLAGS_EPHEMERAL {
+					if data.Flags != corde.RESPONSE_FLAGS_EPHEMERAL {
 						t.Errorf("expected ephemeral flag got %d", data.Flags)
 					}
 				},
 			},
-			interaction: &corde.Request[components.SlashCommandInteractionData]{},
+			interaction: &corde.Request[corde.SlashCommandInteractionData]{},
 		},
 	}
 	for _, tt := range tests {
@@ -46,8 +46,8 @@ func Test_btnNext(t *testing.T) {
 	tests := []struct {
 		name        string
 		mock        owmock.ResponseWriterMock
-		interaction *corde.Request[components.ButtonInteractionData]
-		fn          func(corde.ResponseWriter, *corde.Request[components.ButtonInteractionData])
+		interaction *corde.Request[corde.ButtonInteractionData]
+		fn          func(corde.ResponseWriter, *corde.Request[corde.ButtonInteractionData])
 	}{
 		{
 			name: "btn next",
@@ -59,12 +59,12 @@ func Test_btnNext(t *testing.T) {
 						t.Error("expected some sort of response")
 					}
 
-					if data.Flags != components.RESPONSE_FLAGS_EPHEMERAL {
+					if data.Flags != corde.RESPONSE_FLAGS_EPHEMERAL {
 						t.Errorf("expected ephemeral flag got %d", data.Flags)
 					}
 				},
 			},
-			interaction: &corde.Request[components.ButtonInteractionData]{},
+			interaction: &corde.Request[corde.ButtonInteractionData]{},
 			fn:          btnNext(&corde.Mux{Client: http.DefaultClient}, corde.GuildOpt(0), &sync.Mutex{}, &selectedID),
 		},
 	}

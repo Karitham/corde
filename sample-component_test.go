@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/Karitham/corde"
-	"github.com/Karitham/corde/components"
 	"github.com/Karitham/corde/owmock"
 	"github.com/matryer/is"
 )
@@ -14,19 +13,19 @@ func TestComponentInteraction(t *testing.T) {
 	assert := is.New(t)
 	pub, _ := owmock.GenerateKeys()
 	mux := corde.NewMux(pub, 0, "")
-	mux.OnNotFound = func(_ corde.ResponseWriter, ir *corde.Request[components.JsonRaw]) {
+	mux.OnNotFound = func(_ corde.ResponseWriter, ir *corde.Request[corde.JsonRaw]) {
 		t.Log(ir)
 	}
 
-	mux.ButtonComponent("click_one", func(w corde.ResponseWriter, _ *corde.Request[components.ButtonInteractionData]) {
-		w.Respond(&components.InteractionRespData{
+	mux.ButtonComponent("click_one", func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
+		w.Respond(&corde.InteractionRespData{
 			Content: "Hello World!",
 		})
 	})
 
 	expect := &owmock.InteractionResponse{
 		Type: 4,
-		Data: components.InteractionRespData{
+		Data: corde.InteractionRespData{
 			Content: "Hello World!",
 		},
 	}
@@ -52,7 +51,7 @@ const SampleComponent = `{
         "flags": 0,
         "embeds": [],
         "edited_timestamp": null,
-        "content": "This is a message with components.",
+        "content": "This is a message with ",
         "components": [
             {
                 "type": 1,

@@ -1,13 +1,11 @@
-package components
-
-import "github.com/Karitham/corde/snowflake"
+package corde
 
 // Message is a Discord Message
 // https://discord.com/developers/docs/resources/channel#message-object
 type Message struct {
-	ID                snowflake.Snowflake   `json:"id"`
-	ChannelID         snowflake.Snowflake   `json:"channel_id"`
-	GuildID           snowflake.Snowflake   `json:"guild_id,omitempty"`
+	ID                Snowflake             `json:"id"`
+	ChannelID         Snowflake             `json:"channel_id"`
+	GuildID           Snowflake             `json:"guild_id,omitempty"`
 	Author            User                  `json:"user,omitempty"`
 	Member            Member                `json:"member,omitempty"`
 	Content           string                `json:"content"`
@@ -16,18 +14,18 @@ type Message struct {
 	TTS               bool                  `json:"tts"`
 	Mention           bool                  `json:"mention_everyone"`
 	Mentions          []User                `json:"mentions,omitempty"`
-	MentionRoles      []snowflake.Snowflake `json:"mention_roles,omitempty"`
+	MentionRoles      []Snowflake           `json:"mention_roles,omitempty"`
 	MentionChannels   []Channel             `json:"mention_channels,omitempty"`
 	Attachments       []Attachment          `json:"attachments,omitempty"`
 	Embeds            []Embed               `json:"embeds,omitempty"`
 	Reactions         []Reaction            `json:"reactions,omitempty"`
 	Nonce             string                `json:"nonce,omitempty"`
 	Pinned            bool                  `json:"pinned,omitempty"`
-	WebhookID         snowflake.Snowflake   `json:"webhook_id,omitempty"`
+	WebhookID         Snowflake             `json:"webhook_id,omitempty"`
 	Type              MessageType           `json:"type"`
 	Activity          Activity              `json:"activity,omitempty"`
 	Application       Application           `json:"application,omitempty"`
-	ApplicationID     snowflake.Snowflake   `json:"application_id,omitempty"`
+	ApplicationID     Snowflake             `json:"application_id,omitempty"`
 	MessageReference  MessageReference      `json:"message_reference,omitempty"`
 	Flags             MessageFlag           `json:"flags,omitempty"`
 	ReferencedMessage *Message              `json:"referenced_message,omitempty"`

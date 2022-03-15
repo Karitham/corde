@@ -1,8 +1,4 @@
-package components
-
-import (
-	"github.com/Karitham/corde/snowflake"
-)
+package corde
 
 const (
 	// RouteInteractionSubcommandGroup represents the map key for a subcommand group route
@@ -49,19 +45,19 @@ const (
 // Interaction is a Discord Interaction
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interactions
 type Interaction[T InteractionDataConstraint] struct {
-	ID            snowflake.Snowflake `json:"id"`
-	ApplicationID snowflake.Snowflake `json:"application_id"`
-	Type          InteractionType     `json:"type"`
-	Data          T                   `json:"data,omitempty"`
-	GuildID       snowflake.Snowflake `json:"guild_id,omitempty"`
-	ChannelID     snowflake.Snowflake `json:"channel_id,omitempty"`
-	Member        Member              `json:"member,omitempty"`
-	User          *User               `json:"user,omitempty"`
-	Token         string              `json:"token"`
-	Version       int                 `json:"version"`
-	Message       *Message            `json:"message,omitempty"`
-	Locale        string              `json:"locale,omitempty"`
-	GuildLocale   string              `json:"guild_locale,omitempty"`
+	ID            Snowflake       `json:"id"`
+	ApplicationID Snowflake       `json:"application_id"`
+	Type          InteractionType `json:"type"`
+	Data          T               `json:"data,omitempty"`
+	GuildID       Snowflake       `json:"guild_id,omitempty"`
+	ChannelID     Snowflake       `json:"channel_id,omitempty"`
+	Member        Member          `json:"member,omitempty"`
+	User          *User           `json:"user,omitempty"`
+	Token         string          `json:"token"`
+	Version       int             `json:"version"`
+	Message       *Message        `json:"message,omitempty"`
+	Locale        string          `json:"locale,omitempty"`
+	GuildLocale   string          `json:"guild_locale,omitempty"`
 
 	Route                string               `json:"-"`
 	InnerInteractionType InnerInteractionType `json:"-"`
@@ -108,7 +104,7 @@ type (
 	}
 
 	AutocompleteInteractionData struct {
-		ID      snowflake.Snowflake `json:"id"`
+		ID      Snowflake           `json:"id"`
 		Name    string              `json:"name"`
 		Type    int                 `json:"type"`
 		Options OptionsInteractions `json:"options,omitempty"`
@@ -149,34 +145,34 @@ type (
 	}
 
 	UserCommandInteractionData struct {
-		ID       snowflake.Snowflake `json:"id"`
-		TargetID snowflake.Snowflake `json:"target_id,omitempty"`
-		Name     string              `json:"name"`
-		Type     int                 `json:"type"`
+		ID       Snowflake `json:"id"`
+		TargetID Snowflake `json:"target_id,omitempty"`
+		Name     string    `json:"name"`
+		Type     int       `json:"type"`
 		resolvedInteractionWithOptions
 	}
 
 	MessageCommandInteractionData struct {
-		ID       snowflake.Snowflake `json:"id"`
-		TargetID snowflake.Snowflake `json:"target_id,omitempty"`
-		Name     string              `json:"name"`
-		Type     int                 `json:"type"`
+		ID       Snowflake `json:"id"`
+		TargetID Snowflake `json:"target_id,omitempty"`
+		Name     string    `json:"name"`
+		Type     int       `json:"type"`
 		resolvedInteractionWithOptions
 	}
 
 	SlashCommandInteractionData struct {
-		ID   snowflake.Snowflake `json:"id"`
-		Name string              `json:"name"`
-		Type int                 `json:"type"`
+		ID   Snowflake `json:"id"`
+		Name string    `json:"name"`
+		Type int       `json:"type"`
 		resolvedInteractionWithOptions
 	}
 
 	PartialRoutingType struct {
-		ID            snowflake.Snowflake `json:"id"`
-		Type          int                 `json:"type"`
-		ComponentType int                 `json:"component_type"`
-		Name          string              `json:"name"`
-		CustomID      string              `json:"custom_id"`
+		ID            Snowflake `json:"id"`
+		Type          int       `json:"type"`
+		ComponentType int       `json:"component_type"`
+		Name          string    `json:"name"`
+		CustomID      string    `json:"custom_id"`
 		resolvedInteractionWithOptions
 	}
 )
