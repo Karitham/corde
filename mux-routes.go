@@ -24,3 +24,8 @@ func (m *Mux) UserCommand(route string, handler func(ResponseWriter, *Request[Us
 func (m *Mux) MessageCommand(route string, handler func(ResponseWriter, *Request[MessageCommandInteractionData])) {
 	m.Mount(MessageCommandInteraction, route, handler)
 }
+
+// Modal mounts a modal interaction response on the mux
+func (m *Mux) Modal(route string, handler func(ResponseWriter, *Request[ModalInteractionData])) {
+	m.Mount(ModalInteraction, route, handler)
+}

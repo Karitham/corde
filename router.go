@@ -13,12 +13,13 @@ import (
 // ResponseWriter handles responding to interactions
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
 type ResponseWriter interface {
-	Pong()
+	Ack()
 	Respond(InteractionResponder)
-	DeferedRespond(InteractionResponder)
+	DeferedRespond()
 	Update(InteractionResponder)
-	DeferedUpdate(InteractionResponder)
+	DeferedUpdate()
 	Autocomplete(InteractionResponder)
+	Modal(Modal)
 }
 
 // Request is an incoming request Interaction
@@ -92,6 +93,9 @@ func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
 		case 4:
 			i.InnerInteractionType = TextInputInteraction
 		}
+	case INTERACTION_TYPE_MODAL:
+		i.Type = INTERACTION_TYPE_MODAL
+		i.InnerInteractionType = ModalInteraction
 	}
 
 	m.routeReq(&Responder{w: w}, i)
@@ -102,7 +106,7 @@ func (m *Mux) routeReq(r ResponseWriter, i *Request[JsonRaw]) {
 	m.rMu.RLock()
 	defer m.rMu.RUnlock()
 	if i.Type == INTERACTION_TYPE_PING {
-		r.Pong()
+		r.Ack()
 		return
 	}
 
@@ -130,6 +134,10 @@ func (m *Mux) routeReq(r ResponseWriter, i *Request[JsonRaw]) {
 			err = routeRequest[MessageCommandInteractionData](*handler, i.InnerInteractionType, r, i)
 		case UserCommandInteraction:
 			err = routeRequest[UserCommandInteractionData](*handler, i.InnerInteractionType, r, i)
+
+		// Modal
+		case ModalInteraction:
+			err = routeRequest[ModalInteractionData](*handler, i.InnerInteractionType, r, i)
 		}
 	}
 	if err != nil {

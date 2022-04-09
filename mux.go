@@ -86,7 +86,8 @@ func (m *Mux) Mount(typ InnerInteractionType, route string, handler any) {
 
 	if r, ok := m.routes.Get(route); ok {
 		(*r)[typ] = handler
-	} else {
-		m.routes.Insert(route, &Handlers{typ: handler})
+		return
 	}
+
+	m.routes.Insert(route, &Handlers{typ: handler})
 }

@@ -20,6 +20,7 @@ const (
 	INTERACTION_TYPE_APPLICATION_COMMAND
 	INTERACTION_TYPE_MESSAGE_COMPONENT
 	INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE
+	INTERACTION_TYPE_MODAL
 )
 
 // InnerInteractionType is the inner type of interactions,
@@ -40,6 +41,8 @@ const (
 	SlashCommandInteraction
 	UserCommandInteraction
 	MessageCommandInteraction
+
+	ModalInteraction
 )
 
 // Interaction is a Discord Interaction
