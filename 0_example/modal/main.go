@@ -1,14 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/Karitham/corde"
 )
 
-var command = corde.NewSlashCommand("bongo", "send a big bongo")
+var command = corde.NewSlashCommand("modal", "send a modal")
 
 func main() {
 	token := os.Getenv("DISCORD_BOT_TOKEN")
@@ -25,7 +25,11 @@ func main() {
 	}
 
 	m := corde.NewMux(pk, appID, token)
-	m.SlashCommand("bongo", bongoHandler)
+	m.SlashCommand("modal", respondModal)
+	m.Modal("pog-modal", func(w corde.ResponseWriter, r *corde.Request[corde.ModalInteractionData]) {
+		json.NewEncoder(os.Stderr).Encode(r)
+		w.DeferedUpdate()
+	})
 
 	g := corde.GuildOpt(corde.SnowflakeFromString(os.Getenv("DISCORD_GUILD_ID")))
 	if err := m.RegisterCommand(command, g); err != nil {
@@ -38,12 +42,18 @@ func main() {
 	}
 }
 
-func bongoHandler(w corde.ResponseWriter, _ *corde.Request[corde.SlashCommandInteractionData]) {
-	resp, err := http.Get("https://cdn.discordapp.com/emojis/745709799890747434.gif?size=128")
-	if err != nil {
-		w.Respond(corde.NewResp().Content("couldn't retrieve bongo").Ephemeral())
-		return
-	}
-	defer resp.Body.Close()
-	w.Respond(corde.NewResp().Attachment(resp.Body, "bongo.gif"))
+func respondModal(w corde.ResponseWriter, r *corde.Request[corde.SlashCommandInteractionData]) {
+	w.Modal(corde.Modal{
+		Title:    "xoxo",
+		CustomID: "pog-modal",
+		Components: []corde.Component{
+			corde.TextInputComponent{
+				CustomID:    "pog-component",
+				Style:       corde.TEXT_PARAGRAPH,
+				Label:       "label",
+				Required:    false,
+				Placeholder: "placeholder",
+			}.Component(),
+		},
+	})
 }

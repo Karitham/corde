@@ -39,8 +39,8 @@ func main() {
 	}
 
 	m.Route("nft", func(m *corde.Mux) {
-		m.Command("user", NFTuser)
-		m.Command("message", NFTmessage)
+		m.UserCommand("user", NFTuser)
+		m.MessageCommand("message", NFTmessage)
 	})
 
 	log.Println("serving on :8070")
@@ -49,37 +49,36 @@ func main() {
 	}
 }
 
-func NFTuser(w corde.ResponseWriter, i *corde.InteractionRequest) {
+func NFTuser(w corde.ResponseWriter, i *corde.Request[corde.UserCommandInteractionData]) {
 	user := i.Data.Resolved.Users.First()
 	url := user.AvatarURL()
-	username := user.Username
 
 	if url == "" {
-		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", username).Ephemeral())
+		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", user.Username).Ephemeral())
 		return
 	}
 
 	resp, err := http.Get(url)
 	if err != nil {
-		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", username).Ephemeral())
+		w.Respond(corde.NewResp().Contentf("error getting %s's profile pic", user.Username).Ephemeral())
 		return
 	}
 	defer resp.Body.Close()
 
 	filename := filepath.Base(url)
 	w.Respond(corde.NewResp().
-		Contentf("Good job %s, you just minted %s's profile picture", i.User.Username, username).
+		Contentf("Good job %s, you just minted %s's profile picture", i.Member.User.Username, user.Username).
 		Attachment(resp.Body, filename),
 	)
 }
 
-func NFTmessage(w corde.ResponseWriter, i *corde.InteractionRequest) {
+func NFTmessage(w corde.ResponseWriter, i *corde.Request[corde.MessageCommandInteractionData]) {
 	msg := i.Data.Resolved.Messages.First()
 	chanID := msg.ChannelID
 	msgID := msg.ID
 
 	message := fmt.Sprintf("https://discordapp.com/channels/%d/%d/%d", i.GuildID, chanID, msgID)
 	w.Respond(corde.NewResp().
-		Contentf("Good job %s, you just minted this message, here's the link %s", i.User.Username, message),
+		Contentf("Good job %s, you just minted this message, here's the link %s", i.Member.User.Username, message),
 	)
 }

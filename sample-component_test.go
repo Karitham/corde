@@ -13,8 +13,11 @@ func TestComponentInteraction(t *testing.T) {
 	assert := is.New(t)
 	pub, _ := owmock.GenerateKeys()
 	mux := corde.NewMux(pub, 0, "")
+	mux.OnNotFound = func(_ corde.ResponseWriter, ir *corde.Request[corde.JsonRaw]) {
+		t.Log(ir)
+	}
 
-	mux.Button("click_one", func(w corde.ResponseWriter, _ *corde.InteractionRequest) {
+	mux.ButtonComponent("click_one", func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
 		w.Respond(&corde.InteractionRespData{
 			Content: "Hello World!",
 		})
@@ -48,7 +51,7 @@ const SampleComponent = `{
         "flags": 0,
         "embeds": [],
         "edited_timestamp": null,
-        "content": "This is a message with components.",
+        "content": "This is a message with ",
         "components": [
             {
                 "type": 1,

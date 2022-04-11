@@ -20,7 +20,7 @@ type InteractionResponder interface {
 	InteractionRespData() *InteractionRespData
 }
 
-var _ ResponseWriter = &Responder{}
+var _ ResponseWriter = (*Responder)(nil)
 
 type intResponse struct {
 	Type int                  `json:"type"`
@@ -28,7 +28,7 @@ type intResponse struct {
 }
 
 // Pong responds to pings on the gateway
-func (r *Responder) Pong() {
+func (r *Responder) Ack() {
 	r.w.Header().Set("content-type", "application/json")
 	json.NewEncoder(r.w).Encode(intResponse{Type: 1})
 }
@@ -39,8 +39,9 @@ func (r *Responder) Respond(i InteractionResponder) {
 }
 
 // DeferedRespond responds in defered
-func (r *Responder) DeferedRespond(i InteractionResponder) {
-	r.respond(intResponse{Type: 5, Data: i.InteractionRespData()})
+func (r *Responder) DeferedRespond() {
+	r.w.Header().Set("content-type", "application/json")
+	json.NewEncoder(r.w).Encode(intResponse{Type: 5})
 }
 
 // Update updates the target message
@@ -49,13 +50,28 @@ func (r *Responder) Update(i InteractionResponder) {
 }
 
 // DeferedUpdate updates the target message in defered
-func (r *Responder) DeferedUpdate(i InteractionResponder) {
-	r.respond(intResponse{Type: 6, Data: i.InteractionRespData()})
+func (r *Responder) DeferedUpdate() {
+	r.w.Header().Set("content-type", "application/json")
+	json.NewEncoder(r.w).Encode(intResponse{Type: 6})
 }
 
 // Autocomplete responds to the interaction with autocomplete data
 func (r *Responder) Autocomplete(i InteractionResponder) {
 	r.respond(intResponse{Type: 8, Data: i.InteractionRespData()})
+}
+
+// Modal responds to the interaction with modal data
+func (r *Responder) Modal(m Modal) {
+	r.w.Header().Set("content-type", "application/json")
+	json.NewEncoder(r.w).Encode(
+		struct {
+			Type int   `json:"type"`
+			Data Modal `json:"data"`
+		}{
+			Type: 9,
+			Data: m,
+		},
+	)
 }
 
 func (r *Responder) respond(i intResponse) {

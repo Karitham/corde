@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/Karitham/corde"
-
 	"github.com/matryer/is"
 )
 
@@ -67,7 +66,7 @@ func TestFormatString(t *testing.T) {
 	}
 }
 
-func TestFormatSnowflake(t *testing.T) {
+func TestFormatsSnowflake(t *testing.T) {
 	tt := []testcase[corde.Snowflake]{
 		{
 			Name:     "User",

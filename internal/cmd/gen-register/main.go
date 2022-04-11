@@ -28,10 +28,10 @@ type options struct {
 }
 
 var ConstructorBody string = `	o := &%s{
-		Name:        name,
-		Description: description,
-		Required:    required,
-		Choices:     []Choice[any]{},
+		Name:         name,
+		Description:  description,
+		Required:     required,
+		Choices:      []Choice[any]{},
 		ChannelTypes: []ChannelType{},
 	}
 
@@ -52,7 +52,7 @@ var CreateOptionBody string = `	return CreateOption{
 		Choices:     o.Choices,
 		ChannelTypes: o.ChannelTypes,
 		Autocomplete: o.Autocomplete,
-		Type:        %s,
+		Type:         %s,
 	}
 `
 

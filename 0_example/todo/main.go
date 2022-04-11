@@ -41,10 +41,10 @@ func main() {
 
 	m := corde.NewMux(pk, appID, token)
 	m.Route("todo", func(m *corde.Mux) {
-		m.Command("add", t.addHandler)
-		m.Command("list", t.listHandler)
+		m.SlashCommand("add", t.addHandler)
+		m.SlashCommand("list", t.listHandler)
 		m.Route("rm", func(m *corde.Mux) {
-			m.Command("", t.removeHandler)
+			m.SlashCommand("", t.removeHandler)
 			m.Autocomplete("name", t.autoCompleteNames)
 		})
 	})

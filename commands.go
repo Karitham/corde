@@ -4,60 +4,6 @@ import (
 	"github.com/Karitham/corde/internal/rest"
 )
 
-type OptionType int
-
-const (
-	OPTION_SUB_COMMAND OptionType = iota + 1
-	OPTION_SUB_COMMAND_GROUP
-	OPTION_STRING
-	OPTION_INTEGER
-	OPTION_BOOLEAN
-	OPTION_USER
-	OPTION_CHANNEL
-	OPTION_ROLE
-	OPTION_MENTIONABLE
-	OPTION_NUMBER
-)
-
-type CommandType int
-
-const (
-	COMMAND_CHAT_INPUT CommandType = iota + 1
-	COMMAND_USER
-	COMMAND_MESSAGE
-)
-
-// Command is a Discord application command
-type Command struct {
-	Name              string      `json:"name,omitempty"`
-	ID                Snowflake   `json:"id,omitempty"`
-	Type              CommandType `json:"type,omitempty"`
-	ApplicationID     Snowflake   `json:"application_id,omitempty"`
-	GuildID           Snowflake   `json:"guild_id,omitempty"`
-	Description       string      `json:"description,omitempty"`
-	Options           []Option    `json:"options,omitempty"`
-	DefaultPermission bool        `json:"default_permission,omitempty"`
-	Version           Snowflake   `json:"version,omitempty"`
-}
-
-// Option is an option for an application Command
-type Option struct {
-	Name        string        `json:"name"`
-	Type        OptionType    `json:"type"`
-	Value       JsonRaw       `json:"value"`
-	Description string        `json:"description,omitempty"`
-	Required    bool          `json:"required,omitempty"`
-	Options     []Option      `json:"options,omitempty"`
-	Choices     []Choice[any] `json:"choices,omitempty"`
-	Focused     bool          `json:"focused,omitempty"`
-}
-
-// Choice is an application Command choice
-type Choice[T any] struct {
-	Name  string `json:"name"`
-	Value T      `json:"value"`
-}
-
 // CommandsOpt is an option for a Command
 type CommandsOpt struct {
 	guildID Snowflake
