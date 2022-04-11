@@ -15,15 +15,10 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.18.0-beta1"
-          stable: "false"
+          go-version: "1.18"
       - name: Run Tests
         run: go test -race -v ./...
       - name: Run Vet
         run: go vet ./...
       - name: Example Compliance
-        run: |
-          go build ./0_example/bongo
-          go build ./0_example/moderate-myself
-          go build ./0_example/nft
-          go build ./0_example/todo
+        run: go build -v -a ./0_example/...

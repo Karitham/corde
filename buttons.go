@@ -24,7 +24,7 @@ const (
 	COMPONENT_ACTION_ROW ComponentType = iota + 1
 	COMPONENT_BUTTON
 	COMPONENT_SELECT_MENU
-	COMPONENT_TEXT
+	COMPONENT_TEXT_INPUT
 )
 
 // Component
@@ -69,7 +69,7 @@ type TextInputComponent struct {
 
 func (t TextInputComponent) Component() Component {
 	return Component{
-		Type:        COMPONENT_TEXT,
+		Type:        COMPONENT_TEXT_INPUT,
 		CustomID:    t.CustomID,
 		Style:       t.Style,
 		Label:       t.Label,

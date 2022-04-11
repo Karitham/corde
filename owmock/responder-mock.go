@@ -8,11 +8,10 @@ import (
 
 // ResponseWriterMock mocks corde's ResponseWriter interface
 type ResponseWriterMock struct {
-	RespondHook        func(corde.InteractionResponder)
-	DeferedRespondHook func(corde.InteractionResponder)
-	UpdateHook         func(corde.InteractionResponder)
-	DeferedUpdateHook  func(corde.InteractionResponder)
-	AutocompleteHook   func(corde.InteractionResponder)
+	RespondHook      func(corde.InteractionResponder)
+	UpdateHook       func(corde.InteractionResponder)
+	AutocompleteHook func(corde.InteractionResponder)
+	ModalHook        func(corde.Modal)
 
 	T *testing.T
 }
@@ -23,7 +22,7 @@ func NewRWMock(t *testing.T) ResponseWriterMock {
 }
 
 // Pong implements ResponseWriter interface
-func (r ResponseWriterMock) Pong() {}
+func (r ResponseWriterMock) Ack() {}
 
 // Response implements ResponseWriter interface
 func (r ResponseWriterMock) Respond(i corde.InteractionResponder) {
@@ -36,14 +35,7 @@ func (r ResponseWriterMock) Respond(i corde.InteractionResponder) {
 }
 
 // DeferedRespond implements ResponseWriter interface
-func (r ResponseWriterMock) DeferedRespond(i corde.InteractionResponder) {
-	if r.DeferedRespondHook != nil {
-		r.DeferedRespondHook(i)
-		return
-	}
-
-	r.T.Error("unexpected defered respond hook called")
-}
+func (r ResponseWriterMock) DeferedRespond() {}
 
 // Update implements ResponseWriter interface
 func (r ResponseWriterMock) Update(i corde.InteractionResponder) {
@@ -56,14 +48,7 @@ func (r ResponseWriterMock) Update(i corde.InteractionResponder) {
 }
 
 // DeferedUpdate implements ResponseWriter interface
-func (r ResponseWriterMock) DeferedUpdate(i corde.InteractionResponder) {
-	if r.DeferedUpdateHook != nil {
-		r.DeferedUpdateHook(i)
-		return
-	}
-
-	r.T.Error("unexpected defered update hook called")
-}
+func (r ResponseWriterMock) DeferedUpdate() {}
 
 // Autocomplete implements ResponseWriter interface
 func (r ResponseWriterMock) Autocomplete(i corde.InteractionResponder) {
@@ -73,6 +58,16 @@ func (r ResponseWriterMock) Autocomplete(i corde.InteractionResponder) {
 	}
 
 	r.T.Error("unexpected autocomplete hook called")
+}
+
+// Modal implements ResponseWriter interface
+func (r ResponseWriterMock) Modal(m corde.Modal) {
+	if r.ModalHook != nil {
+		r.ModalHook(m)
+		return
+	}
+
+	r.T.Error("unexpected modal hook called")
 }
 
 // type	interaction callback type	the type of response
