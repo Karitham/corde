@@ -1,6 +1,6 @@
 github.com/akrennmair/go-radix v1.0.1-0.20211215212324-49d05194b0a3 h1:cC+usowX2qUArGE+BauZSn2qCxHqBXhBmA3CkFMULBg=
 github.com/akrennmair/go-radix v1.0.1-0.20211215212324-49d05194b0a3/go.mod h1:YPJ4C/zdh9bNuHZCccyEX3xnq7vtjMw2Lu8RgBohgRk=
-github.com/karitham/go-genial v0.4.1 h1:KQont8ofqpttK7jE8LMqK9mMnupHpXfZJt6fx8stSQo=
-github.com/karitham/go-genial v0.4.1/go.mod h1:HBN0CvV0hsPCMegF7wvmUK3l8OnNzs8XVxt350NI5eE=
+github.com/karitham/go-genial v0.4.2 h1:pPk1i53DWsXTdZ/VaAqVeHNErbx+MLjRyFQcRCiW5qo=
+github.com/karitham/go-genial v0.4.2/go.mod h1:HBN0CvV0hsPCMegF7wvmUK3l8OnNzs8XVxt350NI5eE=
 github.com/matryer/is v1.4.0 h1:sosSmIWwkYITGrxZ25ULNDeKiMNzFSr4V/eqBQP0PeE=
 github.com/matryer/is v1.4.0/go.mod h1:8I/i5uYgLzgsgEloJE1U6xx5HkBQpAZvepWuujKwMRU=

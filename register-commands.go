@@ -1,6 +1,8 @@
 package corde
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // CreateCommander is a command that can be registered
 type CreateCommander interface {
