@@ -15,17 +15,7 @@ type EmbedB struct {
 func NewEmbed() *EmbedB {
 	return &EmbedB{
 		embed: Embed{
-			Title:       "",
-			Description: "",
-			URL:         "",
-			Color:       0,
-			Footer:      Footer{},
-			Image:       Image{},
-			Thumbnail:   Image{},
-			Video:       Video{},
-			Provider:    Provider{},
-			Author:      Author{},
-			Fields:      []Field{},
+			Fields: []Field{},
 		},
 	}
 }
@@ -152,6 +142,13 @@ func (e *EmbedB) Timestamp(t time.Time) *EmbedB {
 func (e *EmbedB) Color(i uint32) *EmbedB {
 	e.embed.Color = i
 	return e
+}
+
+// Message returns the embed wrapped in a message
+func (e *EmbedB) Message() Message {
+	return Message{
+		Embeds: []Embed{e.embed},
+	}
 }
 
 func opt[T any](v T) *T {
