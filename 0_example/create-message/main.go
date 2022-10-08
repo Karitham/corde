@@ -19,16 +19,12 @@ func main() {
 	}
 
 	m := corde.NewMux("", 0, token)
-
-	message := corde.Message{
-		Embeds: []corde.Embed{
-			{
-				Title:       "hello corde!",
-				URL:         "https://github.com/Karitham/corde",
-				Description: "corde is awesome :knot:",
-			},
-		},
-	}
+	message := corde.NewEmbed().
+		Title("Hello corde!").
+		URL("https://github.com/Karitham/corde").
+		Color(0xffffff).
+		Description("corde is awesome :knot:").
+		Message()
 
 	msg, err := m.CreateMessage(chID, message)
 	if err != nil {
