@@ -11,42 +11,50 @@ import (
 )
 
 // returns the body and its content-type
-func toBody(i *InteractionRespData) (*bytes.Buffer, string) {
-	body := new(bytes.Buffer)
+func toBody(w io.Writer, m *InteractionRespData) (string, error) {
 	contentType := "application/json"
 
 	payloadJSON := &bytes.Buffer{}
-	err := json.NewEncoder(payloadJSON).Encode(i)
+	err := json.NewEncoder(payloadJSON).Encode(m)
 	if err != nil {
-		return nil, ""
+		return "", err
 	}
 
-	if len(i.Attachments) < 1 {
-		payloadJSON.WriteTo(body)
-		return body, contentType
+	if len(m.Attachments) < 1 {
+		payloadJSON.WriteTo(w)
+		return contentType, nil
 	}
 
-	mw := multipart.NewWriter(body)
+	mw := multipart.NewWriter(w)
 	defer mw.Close()
 
 	contentType = mw.FormDataContentType()
 	mw.WriteField("payload_json", payloadJSON.String())
 
-	for i, f := range i.Attachments {
+	if err := writeAttachments(mw, m.Attachments); err != nil {
+		return contentType, err
+	}
+
+	return contentType, nil
+}
+
+func writeAttachments(mw *multipart.Writer, attachments []Attachment) error {
+	for i, f := range attachments {
 		if f.ID == 0 {
 			f.ID = Snowflake(i)
 		}
 
 		ff, CFerr := mw.CreateFormFile(fmt.Sprintf("files[%d]", i), f.Filename)
 		if CFerr != nil {
-			return body, contentType
+			return CFerr
 		}
 
 		if _, CopyErr := io.Copy(ff, f.Body); CopyErr != nil {
-			return body, contentType
+			return CopyErr
 		}
 	}
-	return body, contentType
+
+	return nil
 }
 
 // GetOriginalInteraction returns the original response to an Interaction
@@ -66,9 +74,13 @@ func (m *Mux) GetOriginalInteraction(token string) (*InteractionRespData, error)
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
 func (m *Mux) EditOriginalInteraction(token string, data InteractionResponder) error {
-	body, contentType := toBody(data.InteractionRespData())
+	body := &bytes.Buffer{}
+	contentType, err := toBody(body, data.InteractionRespData())
+	if err != nil {
+		return err
+	}
 
-	_, err := m.Client.Do(
+	_, err = m.Client.Do(
 		rest.Req("/webhooks", m.AppID, token, "messages/@original").
 			AnyBody(body).Patch(m.authorize, rest.ContentType(contentType)),
 	)
@@ -97,9 +109,13 @@ func (m *Mux) DeleteOriginalInteraction(token string) error {
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#followup-messages
 func (m *Mux) FollowUpInteraction(token string, data InteractionResponder) error {
-	body, contentType := toBody(data.InteractionRespData())
+	body := &bytes.Buffer{}
+	contentType, err := toBody(body, data.InteractionRespData())
+	if err != nil {
+		return err
+	}
 
-	_, err := m.Client.Do(
+	_, err = m.Client.Do(
 		rest.Req("/webhooks", m.AppID, token).
 			AnyBody(body).Post(m.authorize, rest.ContentType(contentType)),
 	)
@@ -126,9 +142,13 @@ func (m *Mux) GetFollowUpInteraction(token string, messageID Snowflake) (*Intera
 //
 // https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
 func (m *Mux) EditFollowUpInteraction(token string, messageID Snowflake, data InteractionResponder) error {
-	body, contentType := toBody(data.InteractionRespData())
+	body := &bytes.Buffer{}
+	contentType, err := toBody(body, data.InteractionRespData())
+	if err != nil {
+		return err
+	}
 
-	_, err := m.Client.Do(
+	_, err = m.Client.Do(
 		rest.Req("/webhooks", m.AppID, token, "messages", messageID).
 			AnyBody(body).Patch(m.authorize, rest.ContentType(contentType)),
 	)
