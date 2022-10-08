@@ -3,6 +3,7 @@ package corde
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 
@@ -40,16 +41,30 @@ func toBodyMessage(w io.Writer, m Message) (string, error) {
 // CreateMessage creates a new message in a channel
 //
 // https://discord.com/developers/docs/resources/channel#create-message
-func (m *Mux) CreateMessage(channelID Snowflake, data Message) error {
+func (m *Mux) CreateMessage(channelID Snowflake, data Message) (*Message, error) {
 	body := &bytes.Buffer{}
 	contentType, err := toBodyMessage(body, data)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = m.Client.Do(
+	resp, err := m.Client.Do(
 		rest.Req("/channels", channelID, "messages").
 			AnyBody(body).Post(m.authorize, rest.ContentType(contentType)),
 	)
-	return err
+	if err != nil {
+		return nil, fmt.Errorf("failed to create message: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 299 {
+		anyerr := map[string]any{}
+		json.NewDecoder(resp.Body).Decode(&anyerr)
+		return nil, fmt.Errorf("failed to create message: %+v", anyerr)
+	}
+
+	msg := &Message{}
+	json.NewDecoder(resp.Body).Decode(msg)
+	return msg, nil
+
 }
