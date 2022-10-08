@@ -26,7 +26,7 @@ type Message struct {
 	Activity          Activity              `json:"activity,omitempty"`
 	Application       Application           `json:"application,omitempty"`
 	ApplicationID     Snowflake             `json:"application_id,omitempty"`
-	MessageReference  MessageReference      `json:"message_reference,omitempty"`
+	MessageReference  *MessageReference     `json:"message_reference,omitempty"`
 	Flags             MessageFlag           `json:"flags,omitempty"`
 	ReferencedMessage *Message              `json:"referenced_message,omitempty"`
 	Interaction       *Interaction[JsonRaw] `json:"interaction,omitempty"`

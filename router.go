@@ -169,5 +169,5 @@ func routeRequest[IntReqData InteractionDataConstraint](
 		return nil
 	}
 
-	return fmt.Errorf("No handler for interaction type: %d", it)
+	return fmt.Errorf("no handler for interaction type: %d", it)
 }
