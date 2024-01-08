@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"os"
 	"path"
 )
 
@@ -16,7 +18,7 @@ type Request struct {
 	body io.Reader
 }
 
-var API = "https://discord.com/api/v9"
+var API = "https://discord.com/api/v10"
 
 func Req(paths ...any) *Request {
 	r := &Request{
@@ -95,6 +97,14 @@ func (r *Request) new(method string, body io.Reader, opts ...func(*http.Request)
 
 	for _, o := range opts {
 		o(req)
+	}
+
+	if os.Getenv("CORDE_DUMP_HTTP_REQUEST") != "" {
+		dump, err := httputil.DumpRequest(req, true)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(string(dump))
 	}
 
 	return req

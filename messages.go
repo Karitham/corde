@@ -23,7 +23,7 @@ type Message struct {
 	Pinned            bool                  `json:"pinned,omitempty"`
 	WebhookID         Snowflake             `json:"webhook_id,omitempty"`
 	Type              MessageType           `json:"type"`
-	Activity          Activity              `json:"activity,omitempty"`
+	Activity          *Activity             `json:"activity,omitempty"`
 	Application       Application           `json:"application,omitempty"`
 	ApplicationID     Snowflake             `json:"application_id,omitempty"`
 	MessageReference  *MessageReference     `json:"message_reference,omitempty"`
