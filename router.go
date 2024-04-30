@@ -22,12 +22,6 @@ type ResponseWriter interface {
 	Modal(Modal)
 }
 
-// Request is an incoming request Interaction
-type Request[T InteractionDataConstraint] struct {
-	Interaction[T]
-	Context context.Context
-}
-
 // ListenAndServe starts the gateway listening to events
 func (m *Mux) ListenAndServe(addr string) error {
 	r := http.NewServeMux()
@@ -43,10 +37,7 @@ func (m *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // route handles routing the requests
 func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
-	i := &Request[JsonRaw]{
-		Context: r.Context(),
-	}
-
+	i := &Interaction[JsonRaw]{}
 	if err := json.NewDecoder(r.Body).Decode(&i); err != nil {
 		log.Println("Errors unmarshalling json: ", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -98,11 +89,11 @@ func (m *Mux) route(w http.ResponseWriter, r *http.Request) {
 		i.InnerInteractionType = ModalInteraction
 	}
 
-	m.routeReq(&Responder{w: w}, i)
+	m.routeReq(r.Context(), &Responder{w: w}, i)
 }
 
 // routeReq is a recursive implementation to route requests
-func (m *Mux) routeReq(r ResponseWriter, i *Request[JsonRaw]) {
+func (m *Mux) routeReq(ctx context.Context, r ResponseWriter, i *Interaction[JsonRaw]) {
 	m.rMu.RLock()
 	defer m.rMu.RUnlock()
 	if i.Type == INTERACTION_TYPE_PING {
@@ -115,33 +106,33 @@ func (m *Mux) routeReq(r ResponseWriter, i *Request[JsonRaw]) {
 		switch i.InnerInteractionType {
 		// Component
 		case ButtonInteraction: // works & tested
-			err = routeRequest[ButtonInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[ButtonInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 		case SelectMenuInteraction:
-			err = routeRequest[ModalInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[ModalInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 		case ActionRowInteraction:
-			err = routeRequest[SelectInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[SelectInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 		case TextInputInteraction:
-			err = routeRequest[TextInputInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[TextInputInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 
 		// Autocomplete
 		case AutocompleteInteraction:
-			err = routeRequest[AutocompleteInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[AutocompleteInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 
 		// Slash
 		case SlashCommandInteraction:
-			err = routeRequest[SlashCommandInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[SlashCommandInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 		case MessageCommandInteraction:
-			err = routeRequest[MessageCommandInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[MessageCommandInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 		case UserCommandInteraction:
-			err = routeRequest[UserCommandInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[UserCommandInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 
 		// Modal
 		case ModalInteraction:
-			err = routeRequest[ModalInteractionData](*handler, i.InnerInteractionType, r, i)
+			err = routeRequest[ModalInteractionData](ctx, *handler, i.InnerInteractionType, r, i)
 		}
 	}
 	if err != nil {
-		m.OnNotFound(r, i)
+		m.OnNotFound(ctx, r, i)
 	}
 }
 
@@ -152,12 +143,13 @@ func (m *Mux) authorize(req *http.Request) {
 
 // Finds the handler for the route
 func routeRequest[IntReqData InteractionDataConstraint](
+	ctx context.Context,
 	routes map[InnerInteractionType]any,
 	it InnerInteractionType,
 	r ResponseWriter,
-	rawI *Request[JsonRaw],
+	rawI *Interaction[JsonRaw],
 ) error {
-	if h, ok := routes[it].(func(ResponseWriter, *Request[IntReqData])); ok {
+	if h, ok := routes[it].(func(context.Context, ResponseWriter, *Interaction[IntReqData])); ok {
 		var intValues Interaction[IntReqData]
 		v, _ := json.Marshal(rawI) // Better than mapping by hand, but I hate it
 		if err := json.Unmarshal(v, &intValues); err != nil {
@@ -165,7 +157,7 @@ func routeRequest[IntReqData InteractionDataConstraint](
 		}
 		intValues.Route = rawI.Route
 
-		h(r, &Request[IntReqData]{Context: rawI.Context, Interaction: intValues})
+		h(ctx, r, &intValues)
 		return nil
 	}
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -38,7 +39,7 @@ func main() {
 	}
 }
 
-func bongoHandler(w corde.ResponseWriter, _ *corde.Request[corde.SlashCommandInteractionData]) {
+func bongoHandler(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.SlashCommandInteractionData]) {
 	resp, err := http.Get("https://cdn.discordapp.com/emojis/745709799890747434.gif?size=128")
 	if err != nil {
 		w.Respond(corde.NewResp().Content("couldn't retrieve bongo").Ephemeral())

@@ -12,7 +12,9 @@
         devShell = pkgs.mkShell {
           name = "corde";
           packages = with pkgs; [
-            go_1_21
+            go_1_22
+            gofumpt
+            gotools
           ];
         };
       });

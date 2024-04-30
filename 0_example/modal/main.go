@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"os"
@@ -26,7 +27,7 @@ func main() {
 
 	m := corde.NewMux(pk, appID, token)
 	m.SlashCommand("modal", respondModal)
-	m.Modal("pog-modal", func(w corde.ResponseWriter, r *corde.Request[corde.ModalInteractionData]) {
+	m.Modal("pog-modal", func(ctx context.Context, w corde.ResponseWriter, r *corde.Interaction[corde.ModalInteractionData]) {
 		json.NewEncoder(os.Stderr).Encode(r)
 		w.DeferedUpdate()
 	})
@@ -42,7 +43,7 @@ func main() {
 	}
 }
 
-func respondModal(w corde.ResponseWriter, r *corde.Request[corde.SlashCommandInteractionData]) {
+func respondModal(ctx context.Context, w corde.ResponseWriter, r *corde.Interaction[corde.SlashCommandInteractionData]) {
 	w.Modal(corde.Modal{
 		Title:    "xoxo",
 		CustomID: "pog-modal",

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"sync"
@@ -68,8 +69,8 @@ var delBtn = corde.Component{
 	Emoji:    &corde.Emoji{Name: "🗑️"},
 }
 
-func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *corde.Request[corde.SlashCommandInteractionData]) {
-	return func(w corde.ResponseWriter, _ *corde.Request[corde.SlashCommandInteractionData]) {
+func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(context.Context, corde.ResponseWriter, *corde.Interaction[corde.SlashCommandInteractionData]) {
+	return func(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.SlashCommandInteractionData]) {
 		w.Respond(corde.NewResp().
 			ActionRow(nextBtn).
 			Ephemeral().
@@ -78,8 +79,8 @@ func list(m *corde.Mux, g func(*corde.CommandsOpt)) func(corde.ResponseWriter, *
 	}
 }
 
-func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Request[corde.ButtonInteractionData]) {
-	return func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
+func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(context.Context, corde.ResponseWriter, *corde.Interaction[corde.ButtonInteractionData]) {
+	return func(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.ButtonInteractionData]) {
 		mu.Lock()
 		defer mu.Unlock()
 		commands, err := m.GetCommands(g)
@@ -102,8 +103,8 @@ func btnNext(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedI
 	}
 }
 
-func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(corde.ResponseWriter, *corde.Request[corde.ButtonInteractionData]) {
-	return func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
+func btnRemove(m *corde.Mux, g func(*corde.CommandsOpt), mu *sync.Mutex, selectedID *int) func(context.Context, corde.ResponseWriter, *corde.Interaction[corde.ButtonInteractionData]) {
+	return func(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.ButtonInteractionData]) {
 		mu.Lock()
 		defer mu.Unlock()
 		commands, err := m.GetCommands(g)

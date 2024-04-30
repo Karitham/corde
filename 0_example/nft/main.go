@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -49,7 +50,7 @@ func main() {
 	}
 }
 
-func NFTuser(w corde.ResponseWriter, i *corde.Request[corde.UserCommandInteractionData]) {
+func NFTuser(ctx context.Context, w corde.ResponseWriter, i *corde.Interaction[corde.UserCommandInteractionData]) {
 	user := i.Data.Resolved.Users.First()
 	url := user.AvatarURL()
 
@@ -72,7 +73,7 @@ func NFTuser(w corde.ResponseWriter, i *corde.Request[corde.UserCommandInteracti
 	)
 }
 
-func NFTmessage(w corde.ResponseWriter, i *corde.Request[corde.MessageCommandInteractionData]) {
+func NFTmessage(ctx context.Context, w corde.ResponseWriter, i *corde.Interaction[corde.MessageCommandInteractionData]) {
 	msg := i.Data.Resolved.Messages.First()
 	chanID := msg.ChannelID
 	msgID := msg.ID

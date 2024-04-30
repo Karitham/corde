@@ -1,6 +1,7 @@
 package corde_test
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
 
@@ -13,11 +14,11 @@ func TestComponentInteraction(t *testing.T) {
 	assert := is.New(t)
 	pub, _ := owmock.GenerateKeys()
 	mux := corde.NewMux(pub, 0, "")
-	mux.OnNotFound = func(_ corde.ResponseWriter, ir *corde.Request[corde.JsonRaw]) {
+	mux.OnNotFound = func(ctx context.Context, _ corde.ResponseWriter, ir *corde.Interaction[corde.JsonRaw]) {
 		t.Log(ir)
 	}
 
-	mux.ButtonComponent("click_one", func(w corde.ResponseWriter, _ *corde.Request[corde.ButtonInteractionData]) {
+	mux.ButtonComponent("click_one", func(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.ButtonInteractionData]) {
 		w.Respond(&corde.InteractionRespData{
 			Content: "Hello World!",
 		})

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -20,7 +21,7 @@ type todoItem struct {
 	value string
 }
 
-func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.Request[corde.AutocompleteInteractionData]) {
+func (t *todo) autoCompleteNames(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.AutocompleteInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -37,7 +38,7 @@ func (t *todo) autoCompleteNames(w corde.ResponseWriter, _ *corde.Request[corde.
 	w.Autocomplete(resp)
 }
 
-func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Request[corde.SlashCommandInteractionData]) {
+func (t *todo) addHandler(ctx context.Context, w corde.ResponseWriter, i *corde.Interaction[corde.SlashCommandInteractionData]) {
 	value, _ := i.Data.Options.String("value")
 	name, _ := i.Data.Options.String("name")
 
@@ -57,7 +58,7 @@ func (t *todo) addHandler(w corde.ResponseWriter, i *corde.Request[corde.SlashCo
 	w.Respond(corde.NewResp().Contentf("Successfully added %s", name).Ephemeral())
 }
 
-func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Request[corde.SlashCommandInteractionData]) {
+func (t *todo) listHandler(ctx context.Context, w corde.ResponseWriter, _ *corde.Interaction[corde.SlashCommandInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -80,7 +81,7 @@ func (t *todo) listHandler(w corde.ResponseWriter, _ *corde.Request[corde.SlashC
 	)
 }
 
-func (t *todo) removeHandler(w corde.ResponseWriter, i *corde.Request[corde.SlashCommandInteractionData]) {
+func (t *todo) removeHandler(ctx context.Context, w corde.ResponseWriter, i *corde.Interaction[corde.SlashCommandInteractionData]) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 

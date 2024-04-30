@@ -1,6 +1,7 @@
 package corde
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,7 +20,7 @@ type Mux struct {
 	routes     *radix.Tree[Handlers]
 	PublicKey  string // the hex public key provided by discord
 	BasePath   string // base route path, default is "/"
-	OnNotFound func(ResponseWriter, *Request[JsonRaw])
+	OnNotFound func(context.Context, ResponseWriter, *Interaction[JsonRaw])
 	Client     *http.Client
 	AppID      Snowflake
 	BotToken   string
@@ -47,7 +48,7 @@ func NewMux(publicKey string, appID Snowflake, botToken string) *Mux {
 		routes:    radix.New[Handlers](),
 		PublicKey: publicKey,
 		BasePath:  "/",
-		OnNotFound: func(_ ResponseWriter, i *Request[JsonRaw]) {
+		OnNotFound: func(_ context.Context, _ ResponseWriter, i *Interaction[JsonRaw]) {
 			log.Printf("No handler for registered command: %s\n", i.Route)
 		},
 		Client: &http.Client{

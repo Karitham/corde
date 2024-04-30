@@ -66,5 +66,4 @@ func (m *Mux) CreateMessage(channelID Snowflake, data Message) (*Message, error)
 	msg := &Message{}
 	json.NewDecoder(resp.Body).Decode(msg)
 	return msg, nil
-
 }
